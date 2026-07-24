@@ -1,0 +1,1 @@
+- [Imported courier workspace](imported-workspace.md) — keep the existing pnpm workspace and run the React/Vite web app separately from the Express API.
