@@ -2,10 +2,11 @@ import { Router, type IRouter } from "express";
 import { sql } from "drizzle-orm";
 import { db, shipmentsTable } from "@workspace/db";
 import { GetDashboardStatsResponse } from "@workspace/api-zod";
+import { requireAuth } from "../middlewares/authMiddleware";
 
 const router: IRouter = Router();
 
-router.get("/dashboard/stats", async (_req, res): Promise<void> => {
+router.get("/dashboard/stats", requireAuth, async (_req, res): Promise<void> => {
   const rows = await db
     .select({
       status: shipmentsTable.status,

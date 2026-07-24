@@ -13,8 +13,10 @@ import {
   UpdateShipmentResponse,
   CreateShipmentResponse,
 } from "@workspace/api-zod";
+import { requireAuth } from "../middlewares/authMiddleware";
 
 const router: IRouter = Router();
+router.use("/shipments", requireAuth);
 
 function generateTrackingNumber(): string {
   const prefix = "CRR";

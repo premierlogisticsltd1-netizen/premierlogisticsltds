@@ -8,7 +8,7 @@ A pnpm workspace containing the Premier Logistics React/Vite web app and its Exp
 - `PORT=5173 BASE_PATH=/ pnpm --filter @workspace/web run dev` — run the web app locally
 - `PORT=5173 BASE_PATH=/ pnpm --filter @workspace/web run build` — build the web app locally
 - `pnpm --filter @workspace/api-server run dev` — run the API server locally
-- `pnpm run typecheck` — typecheck all packages (currently reports pre-existing web type errors; see Gotchas)
+- `pnpm run typecheck` — typecheck all workspace packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
@@ -52,7 +52,7 @@ No additional preferences recorded.
 
 - The web Vite config requires both `PORT` and `BASE_PATH`; the Replit Web workflow supplies `PORT=5173 BASE_PATH=/`.
 - Use the managed artifact workflows for normal operation; do not add duplicate legacy Web or API Server workflows because they can compete for the same ports.
-- The imported web pages currently have TypeScript errors around generated API-client imports and hook option types. The Vite dev server and production web build still start successfully, but `pnpm run typecheck` is not clean until those application-level mismatches are fixed.
+- The web build emits a non-fatal sourcemap warning from the tooltip component; the production bundle still completes successfully.
 
 ## Pointers
 

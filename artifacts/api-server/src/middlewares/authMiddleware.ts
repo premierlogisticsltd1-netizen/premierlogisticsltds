@@ -83,3 +83,16 @@ export async function authMiddleware(
   req.user = refreshed.user;
   next();
 }
+
+export function requireAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+
+  next();
+}

@@ -10,10 +10,11 @@ import {
   AddTrackingEventResponse,
   TrackShipmentResponse,
 } from "@workspace/api-zod";
+import { requireAuth } from "../middlewares/authMiddleware";
 
 const router: IRouter = Router();
 
-router.get("/shipments/:id/events", async (req, res): Promise<void> => {
+router.get("/shipments/:id/events", requireAuth, async (req, res): Promise<void> => {
   const params = ListShipmentEventsParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -39,7 +40,7 @@ router.get("/shipments/:id/events", async (req, res): Promise<void> => {
   res.json(ListShipmentEventsResponse.parse(events));
 });
 
-router.post("/shipments/:id/events", async (req, res): Promise<void> => {
+router.post("/shipments/:id/events", requireAuth, async (req, res): Promise<void> => {
   const params = AddTrackingEventParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
