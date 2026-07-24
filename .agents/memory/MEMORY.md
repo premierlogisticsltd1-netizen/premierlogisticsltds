@@ -1,2 +1,3 @@
 - [Imported courier workspace](imported-workspace.md) — keep the existing pnpm workspace and run the React/Vite web app separately from the Express API.
 - [Managed artifact workflows](managed-workflows.md) — use the registered web and API workflows; duplicate legacy workflows can cause port conflicts.
+- [Database schema after import](database-schema-after-import.md) — synchronize the development Drizzle schema before diagnosing first-login failures as auth-code bugs.
