@@ -10,6 +10,8 @@ import {
   updateSession,
   type SessionData,
 } from '../lib/auth';
+import { db, usersTable } from '@workspace/db';
+import { eq } from 'drizzle-orm';
 
 declare global {
   namespace Express {
@@ -95,4 +97,19 @@ export function requireAuth(
   }
 
   next();
+}
+
+export function requireRole(...roles: string[]) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+    const [user] = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user.id));
+    if (!user || !roles.includes(user.role)) {
+      res.status(403).json({ error: 'Insufficient permissions' });
+      return;
+    }
+    next();
+  };
 }
