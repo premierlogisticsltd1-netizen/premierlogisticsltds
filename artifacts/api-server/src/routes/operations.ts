@@ -14,24 +14,24 @@ const bodyString = (value: unknown, fallback = "") => typeof value === "string" 
 const bodyNumber = (value: unknown) => typeof value === "number" ? value : Number(value);
 
 router.get("/me", requireAuth, async (req, res): Promise<void> => {
-  const [user] = await db.select({ id: usersTable.id, email: usersTable.email, firstName: usersTable.firstName, lastName: usersTable.lastName, role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user.id));
-  res.json(user ?? { id: req.user.id, email: req.user.email, role: "staff" });
+  const [user] = await db.select({ id: usersTable.id, email: usersTable.email, firstName: usersTable.firstName, lastName: usersTable.lastName, role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user!.id));
+  res.json(user ?? { id: req.user!.id, email: req.user!.email, role: "staff" });
 });
 
 router.post("/portal/register", requireAuth, async (req, res): Promise<void> => {
   const name = bodyString(req.body?.name);
-  const email = bodyString(req.body?.email, req.user.email ?? "");
+  const email = bodyString(req.body?.email, req.user!.email ?? "");
   if (!name || !email) { res.status(400).json({ error: "Name and email are required" }); return; }
   const [customer] = await db.insert(customersTable).values({
-    userId: req.user.id, name, email, company: bodyString(req.body?.company) || null,
+    userId: req.user!.id, name, email, company: bodyString(req.body?.company) || null,
     phone: bodyString(req.body?.phone) || null, address: bodyString(req.body?.address) || null,
   }).onConflictDoUpdate({ target: customersTable.userId, set: { name, email, company: bodyString(req.body?.company) || null, phone: bodyString(req.body?.phone) || null, address: bodyString(req.body?.address) || null, updatedAt: new Date() }}).returning();
-  await db.update(usersTable).set({ role: "customer", updatedAt: new Date() }).where(eq(usersTable.id, req.user.id));
+  await db.update(usersTable).set({ role: "customer", updatedAt: new Date() }).where(eq(usersTable.id, req.user!.id));
   res.status(201).json(customer);
 });
 
 router.get("/portal/overview", requireAuth, async (req, res): Promise<void> => {
-  const [customer] = await db.select().from(customersTable).where(eq(customersTable.userId, req.user.id));
+  const [customer] = await db.select().from(customersTable).where(eq(customersTable.userId, req.user!.id));
   if (!customer) { res.json({ registered: false, customer: null, shipments: [], quotes: [], invoices: [] }); return; }
   const shipments = await db.select().from(shipmentsTable).where(sql`${shipmentsTable.recipientName} = ${customer.name}`).orderBy(desc(shipmentsTable.createdAt)).limit(20);
   const quotes = await db.select().from(quotesTable).where(eq(quotesTable.customerId, customer.id)).orderBy(desc(quotesTable.createdAt));
@@ -98,10 +98,10 @@ router.patch("/quotes/:id", staff, async (req, res): Promise<void> => {
 });
 
 router.get("/invoices", requireAuth, async (req, res): Promise<void> => {
-  const roleUser = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user.id));
+  const roleUser = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user!.id));
   const isCustomer = roleUser[0]?.role === "customer";
   if (isCustomer) {
-    const [customer] = await db.select().from(customersTable).where(eq(customersTable.userId, req.user.id));
+    const [customer] = await db.select().from(customersTable).where(eq(customersTable.userId, req.user!.id));
     res.json(customer ? await db.select().from(invoicesTable).where(eq(invoicesTable.customerId, customer.id)).orderBy(desc(invoicesTable.createdAt)) : []);
     return;
   }
@@ -123,11 +123,11 @@ router.patch("/invoices/:id", staff, async (req, res): Promise<void> => {
 });
 
 router.get("/notifications", requireAuth, async (req, res): Promise<void> => {
-  res.json(await db.select().from(notificationsTable).where(eq(notificationsTable.userId, req.user.id)).orderBy(desc(notificationsTable.createdAt)).limit(50));
+  res.json(await db.select().from(notificationsTable).where(eq(notificationsTable.userId, req.user!.id)).orderBy(desc(notificationsTable.createdAt)).limit(50));
 });
 
 router.patch("/notifications/:id/read", requireAuth, async (req, res): Promise<void> => {
-  const [notification] = await db.update(notificationsTable).set({ read: true }).where(and(eq(notificationsTable.id, id(req.params.id)), eq(notificationsTable.userId, req.user.id))).returning();
+  const [notification] = await db.update(notificationsTable).set({ read: true }).where(and(eq(notificationsTable.id, id(req.params.id)), eq(notificationsTable.userId, req.user!.id))).returning();
   if (!notification) { res.status(404).json({ error: "Notification not found" }); return; }
   res.json(notification);
 });
