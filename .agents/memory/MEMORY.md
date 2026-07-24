@@ -1,1 +1,2 @@
 - [Imported courier workspace](imported-workspace.md) — keep the existing pnpm workspace and run the React/Vite web app separately from the Express API.
+- [Managed artifact workflows](managed-workflows.md) — use the registered web and API workflows; duplicate legacy workflows can cause port conflicts.

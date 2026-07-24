@@ -14,7 +14,7 @@ A pnpm workspace containing the Swift Courier React/Vite web app and its Express
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string (injected automatically by Replit; no manual setup needed)
 - Required secret: `SESSION_SECRET` — used for browser session signing
-- Workflows: **Web** serves the frontend on port 5173; **API Server** serves the API on port 8080
+- Managed workflows: **artifacts/web: web** serves the frontend; **artifacts/api-server: API Server** serves the API
 - Verify the API at `GET /api/healthz` → `{"status":"ok"}`
 
 ## Stack
@@ -51,6 +51,7 @@ No additional preferences recorded.
 ## Gotchas
 
 - The web Vite config requires both `PORT` and `BASE_PATH`; the Replit Web workflow supplies `PORT=5173 BASE_PATH=/`.
+- Use the managed artifact workflows for normal operation; do not add duplicate legacy Web or API Server workflows because they can compete for the same ports.
 - The imported web pages currently have TypeScript errors around generated API-client imports and hook option types. The Vite dev server and production web build still start successfully, but `pnpm run typecheck` is not clean until those application-level mismatches are fixed.
 
 ## Pointers
