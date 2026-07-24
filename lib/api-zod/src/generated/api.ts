@@ -109,6 +109,18 @@ export const LogoutMobileSessionResponse = zod.object({
 
 
 /**
+ * @summary Get the current user's profile including role
+ */
+export const GetMeResponse = zod.object({
+  "id": zod.string(),
+  "email": zod.string().nullable(),
+  "firstName": zod.string().nullish(),
+  "lastName": zod.string().nullish(),
+  "role": zod.enum(['admin', 'staff', 'driver', 'customer'])
+})
+
+
+/**
  * @summary List all shipments
  */
 export const ListShipmentsQueryParams = zod.object({
@@ -283,6 +295,65 @@ export const AddTrackingEventResponse = zod.object({
 
 
 /**
+ * @summary Assign a driver to a shipment
+ */
+export const AssignDriverParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AssignDriverBody = zod.object({
+  "driverId": zod.number()
+})
+
+export const AssignDriverResponse = zod.object({
+  "shipment": zod.object({
+  "id": zod.number(),
+  "trackingNumber": zod.string(),
+  "senderName": zod.string(),
+  "senderAddress": zod.string(),
+  "recipientName": zod.string(),
+  "recipientAddress": zod.string(),
+  "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "weight": zod.number().nullish(),
+  "description": zod.string().nullish(),
+  "estimatedDelivery": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),
+  "driverId": zod.number(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Submit proof of delivery for a shipment
+ */
+export const SubmitProofOfDeliveryParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const SubmitProofOfDeliveryBody = zod.object({
+  "recipientName": zod.string().min(1),
+  "signatureUrl": zod.string().optional(),
+  "photoUrl": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+export const SubmitProofOfDeliveryResponse = zod.object({
+  "id": zod.number(),
+  "shipmentId": zod.number(),
+  "recipientName": zod.string(),
+  "signatureUrl": zod.string().nullish(),
+  "photoUrl": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "deliveredAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Public tracking lookup by tracking number
  */
 export const TrackShipmentParams = zod.object({
@@ -327,6 +398,494 @@ export const GetDashboardStatsResponse = zod.object({
   "outForDelivery": zod.number(),
   "delivered": zod.number(),
   "failed": zod.number()
+})
+
+
+/**
+ * @summary Register the current user as a customer
+ */
+
+
+
+
+export const RegisterAsCustomerBody = zod.object({
+  "name": zod.string().min(1),
+  "email": zod.string().min(1),
+  "company": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "address": zod.string().optional()
+})
+
+export const RegisterAsCustomerResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "company": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "address": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'suspended']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Get the customer portal overview for the current user
+ */
+export const GetPortalOverviewResponse = zod.object({
+  "registered": zod.boolean(),
+  "customer": zod.union([zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "company": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "address": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'suspended']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+}),zod.null()]),
+  "shipments": zod.array(zod.object({
+  "id": zod.number(),
+  "trackingNumber": zod.string(),
+  "senderName": zod.string(),
+  "senderAddress": zod.string(),
+  "recipientName": zod.string(),
+  "recipientAddress": zod.string(),
+  "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "weight": zod.number().nullish(),
+  "description": zod.string().nullish(),
+  "estimatedDelivery": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "quotes": zod.array(zod.object({
+  "id": zod.number(),
+  "quoteNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "serviceType": zod.string(),
+  "weight": zod.number().nullish(),
+  "estimatedCost": zod.number().nullish(),
+  "status": zod.enum(['requested', 'reviewing', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})),
+  "invoices": zod.array(zod.object({
+  "id": zod.number(),
+  "invoiceNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "shipmentId": zod.number().nullish(),
+  "amount": zod.number(),
+  "currency": zod.string().optional(),
+  "status": zod.enum(['pending', 'paid', 'overdue', 'cancelled']),
+  "dueDate": zod.string().nullish(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+}))
+})
+
+
+/**
+ * @summary List all customers (staff/admin)
+ */
+export const ListCustomersResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "company": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "address": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'suspended']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+export const ListCustomersResponse = zod.array(ListCustomersResponseItem)
+
+
+/**
+ * @summary Create a customer (staff/admin)
+ */
+
+
+
+
+export const CreateCustomerBody = zod.object({
+  "name": zod.string().min(1),
+  "email": zod.string().min(1),
+  "company": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "address": zod.string().optional()
+})
+
+export const CreateCustomerResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "company": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "address": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'suspended']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Update a customer
+ */
+export const UpdateCustomerParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateCustomerBody = zod.object({
+  "name": zod.string().optional(),
+  "company": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "address": zod.string().optional(),
+  "status": zod.enum(['active', 'inactive', 'suspended']).optional()
+})
+
+export const UpdateCustomerResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "company": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "address": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'suspended']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary List all drivers (staff/admin)
+ */
+export const ListDriversResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "licenseNumber": zod.string().nullish(),
+  "status": zod.enum(['available', 'on_delivery', 'off_duty']),
+  "currentLocation": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+export const ListDriversResponse = zod.array(ListDriversResponseItem)
+
+
+/**
+ * @summary Create a driver (admin only)
+ */
+
+
+
+export const CreateDriverBody = zod.object({
+  "name": zod.string().min(1),
+  "email": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "licenseNumber": zod.string().optional(),
+  "currentLocation": zod.string().optional()
+})
+
+export const CreateDriverResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "licenseNumber": zod.string().nullish(),
+  "status": zod.enum(['available', 'on_delivery', 'off_duty']),
+  "currentLocation": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Update a driver
+ */
+export const UpdateDriverParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateDriverBody = zod.object({
+  "name": zod.string().optional(),
+  "email": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "licenseNumber": zod.string().optional(),
+  "status": zod.enum(['available', 'on_delivery', 'off_duty']).optional(),
+  "currentLocation": zod.string().optional()
+})
+
+export const UpdateDriverResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "name": zod.string(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "licenseNumber": zod.string().nullish(),
+  "status": zod.enum(['available', 'on_delivery', 'off_duty']),
+  "currentLocation": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary List quotes (staff/admin see all; customers see their own)
+ */
+export const ListQuotesResponseItem = zod.object({
+  "id": zod.number(),
+  "quoteNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "serviceType": zod.string(),
+  "weight": zod.number().nullish(),
+  "estimatedCost": zod.number().nullish(),
+  "status": zod.enum(['requested', 'reviewing', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+export const ListQuotesResponse = zod.array(ListQuotesResponseItem)
+
+
+/**
+ * @summary Create a quote request
+ */
+
+
+
+
+export const CreateQuoteBody = zod.object({
+  "origin": zod.string().min(1),
+  "destination": zod.string().min(1),
+  "serviceType": zod.string().optional(),
+  "weight": zod.number().optional(),
+  "estimatedCost": zod.number().optional(),
+  "notes": zod.string().optional(),
+  "customerId": zod.number().optional()
+})
+
+export const CreateQuoteResponse = zod.object({
+  "id": zod.number(),
+  "quoteNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "serviceType": zod.string(),
+  "weight": zod.number().nullish(),
+  "estimatedCost": zod.number().nullish(),
+  "status": zod.enum(['requested', 'reviewing', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Update a quote (staff/admin)
+ */
+export const UpdateQuoteParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateQuoteBody = zod.object({
+  "status": zod.enum(['requested', 'reviewing', 'approved', 'rejected']).optional(),
+  "estimatedCost": zod.number().optional(),
+  "notes": zod.string().optional()
+})
+
+export const UpdateQuoteResponse = zod.object({
+  "id": zod.number(),
+  "quoteNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "serviceType": zod.string(),
+  "weight": zod.number().nullish(),
+  "estimatedCost": zod.number().nullish(),
+  "status": zod.enum(['requested', 'reviewing', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary List invoices (staff/admin see all; customers see their own)
+ */
+export const ListInvoicesResponseItem = zod.object({
+  "id": zod.number(),
+  "invoiceNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "shipmentId": zod.number().nullish(),
+  "amount": zod.number(),
+  "currency": zod.string().optional(),
+  "status": zod.enum(['pending', 'paid', 'overdue', 'cancelled']),
+  "dueDate": zod.string().nullish(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+export const ListInvoicesResponse = zod.array(ListInvoicesResponseItem)
+
+
+/**
+ * @summary Create an invoice (staff/admin)
+ */
+export const createInvoiceBodyAmountMin = 0;
+
+
+
+export const CreateInvoiceBody = zod.object({
+  "amount": zod.number().min(createInvoiceBodyAmountMin),
+  "customerId": zod.number().optional(),
+  "shipmentId": zod.number().optional(),
+  "dueDate": zod.string().optional()
+})
+
+export const CreateInvoiceResponse = zod.object({
+  "id": zod.number(),
+  "invoiceNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "shipmentId": zod.number().nullish(),
+  "amount": zod.number(),
+  "currency": zod.string().optional(),
+  "status": zod.enum(['pending', 'paid', 'overdue', 'cancelled']),
+  "dueDate": zod.string().nullish(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Update invoice status (staff/admin)
+ */
+export const UpdateInvoiceParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateInvoiceBody = zod.object({
+  "status": zod.enum(['pending', 'paid', 'overdue', 'cancelled']).optional()
+})
+
+export const UpdateInvoiceResponse = zod.object({
+  "id": zod.number(),
+  "invoiceNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "shipmentId": zod.number().nullish(),
+  "amount": zod.number(),
+  "currency": zod.string().optional(),
+  "status": zod.enum(['pending', 'paid', 'overdue', 'cancelled']),
+  "dueDate": zod.string().nullish(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Get notifications for the current user
+ */
+export const ListNotificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem)
+
+
+/**
+ * @summary Mark a notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const MarkNotificationReadResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.string(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get summary report (staff/admin)
+ */
+export const GetReportsSummaryResponse = zod.object({
+  "shipments": zod.object({
+  "total": zod.number(),
+  "delivered": zod.number(),
+  "inTransit": zod.number()
+}),
+  "invoices": zod.object({
+  "billed": zod.number(),
+  "paid": zod.number(),
+  "outstanding": zod.number()
+}),
+  "quotes": zod.object({
+  "total": zod.number(),
+  "approved": zod.number()
+}),
+  "generatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List all users (admin only)
+ */
+export const ListAdminUsersResponseItem = zod.object({
+  "id": zod.string(),
+  "email": zod.string().nullable(),
+  "firstName": zod.string().nullish(),
+  "lastName": zod.string().nullish(),
+  "role": zod.enum(['admin', 'staff', 'driver', 'customer']),
+  "createdAt": zod.coerce.date()
+})
+export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
+
+
+/**
+ * @summary Update a user's role (admin only)
+ */
+export const UpdateUserRoleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateUserRoleBody = zod.object({
+  "role": zod.enum(['admin', 'staff', 'driver', 'customer'])
+})
+
+export const UpdateUserRoleResponse = zod.object({
+  "id": zod.string(),
+  "email": zod.string().nullable(),
+  "firstName": zod.string().nullish(),
+  "lastName": zod.string().nullish(),
+  "role": zod.enum(['admin', 'staff', 'driver', 'customer']),
+  "createdAt": zod.coerce.date()
 })
 
 

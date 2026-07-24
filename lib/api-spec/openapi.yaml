@@ -18,6 +18,22 @@ tags:
     description: Shipment tracking
   - name: dashboard
     description: Dashboard statistics
+  - name: customers
+    description: Customer management
+  - name: drivers
+    description: Driver management
+  - name: quotes
+    description: Quote requests and management
+  - name: invoices
+    description: Invoice management
+  - name: notifications
+    description: User notifications
+  - name: portal
+    description: Customer self-service portal
+  - name: reports
+    description: Reports and analytics
+  - name: admin
+    description: Admin user management
 paths:
   /healthz:
     get:
@@ -153,6 +169,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LogoutSuccess'
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [Auth]
+      summary: Get the current user's profile including role
+      responses:
+        "200":
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
 
   /shipments:
     get:
@@ -333,6 +362,68 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /shipments/{id}/assign:
+    post:
+      operationId: assignDriver
+      tags: [shipments]
+      summary: Assign a driver to a shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignDriverInput"
+      responses:
+        "200":
+          description: Driver assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssignDriverResult"
+        "404":
+          description: Shipment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /shipments/{id}/proof-of-delivery:
+    post:
+      operationId: submitProofOfDelivery
+      tags: [shipments]
+      summary: Submit proof of delivery for a shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProofOfDeliveryInput"
+      responses:
+        "201":
+          description: Proof of delivery recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProofOfDelivery"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /track/{trackingNumber}:
     get:
       operationId: trackShipment
@@ -370,6 +461,425 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DashboardStats"
+
+  /portal/register:
+    post:
+      operationId: registerAsCustomer
+      tags: [portal]
+      summary: Register the current user as a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerPortalRegisterInput"
+      responses:
+        "201":
+          description: Customer registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /portal/overview:
+    get:
+      operationId: getPortalOverview
+      tags: [portal]
+      summary: Get the customer portal overview for the current user
+      responses:
+        "200":
+          description: Portal overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalOverview"
+
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      summary: List all customers (staff/admin)
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Create a customer (staff/admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /customers/{id}:
+    patch:
+      operationId: updateCustomer
+      tags: [customers]
+      summary: Update a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerUpdate"
+      responses:
+        "200":
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /drivers:
+    get:
+      operationId: listDrivers
+      tags: [drivers]
+      summary: List all drivers (staff/admin)
+      responses:
+        "200":
+          description: List of drivers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Driver"
+    post:
+      operationId: createDriver
+      tags: [drivers]
+      summary: Create a driver (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DriverInput"
+      responses:
+        "201":
+          description: Driver created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Driver"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /drivers/{id}:
+    patch:
+      operationId: updateDriver
+      tags: [drivers]
+      summary: Update a driver
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DriverUpdate"
+      responses:
+        "200":
+          description: Driver updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Driver"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /quotes:
+    get:
+      operationId: listQuotes
+      tags: [quotes]
+      summary: List quotes (staff/admin see all; customers see their own)
+      responses:
+        "200":
+          description: List of quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quote"
+    post:
+      operationId: createQuote
+      tags: [quotes]
+      summary: Create a quote request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteInput"
+      responses:
+        "201":
+          description: Quote created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /quotes/{id}:
+    patch:
+      operationId: updateQuote
+      tags: [quotes]
+      summary: Update a quote (staff/admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteUpdate"
+      responses:
+        "200":
+          description: Quote updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [invoices]
+      summary: List invoices (staff/admin see all; customers see their own)
+      responses:
+        "200":
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+    post:
+      operationId: createInvoice
+      tags: [invoices]
+      summary: Create an invoice (staff/admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceInput"
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /invoices/{id}:
+    patch:
+      operationId: updateInvoice
+      tags: [invoices]
+      summary: Update invoice status (staff/admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceUpdate"
+      responses:
+        "200":
+          description: Invoice updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: Get notifications for the current user
+      responses:
+        "200":
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark a notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /reports/summary:
+    get:
+      operationId: getReportsSummary
+      tags: [reports]
+      summary: Get summary report (staff/admin)
+      responses:
+        "200":
+          description: Reports summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportsSummary"
+
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      summary: List all users (admin only)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{id}/role:
+    patch:
+      operationId: updateUserRole
+      tags: [admin]
+      summary: Update a user's role (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRoleUpdate"
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "400":
+          description: Invalid role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
 
 components:
   parameters:
@@ -457,6 +967,22 @@ components:
       properties:
         error:
           type: string
+
+    UserProfile:
+      type: object
+      required: [id, email, role]
+      properties:
+        id:
+          type: string
+        email:
+          type: ["string", "null"]
+        firstName:
+          type: ["string", "null"]
+        lastName:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, staff, driver, customer]
 
     Shipment:
       type: object
@@ -596,6 +1122,58 @@ components:
           items:
             $ref: "#/components/schemas/TrackingEvent"
 
+    AssignDriverInput:
+      type: object
+      required: [driverId]
+      properties:
+        driverId:
+          type: integer
+
+    AssignDriverResult:
+      type: object
+      required: [shipment, driverId, message]
+      properties:
+        shipment:
+          $ref: "#/components/schemas/Shipment"
+        driverId:
+          type: integer
+        message:
+          type: string
+
+    ProofOfDeliveryInput:
+      type: object
+      required: [recipientName]
+      properties:
+        recipientName:
+          type: string
+          minLength: 1
+        signatureUrl:
+          type: string
+        photoUrl:
+          type: string
+        notes:
+          type: string
+
+    ProofOfDelivery:
+      type: object
+      required: [id, shipmentId, recipientName, deliveredAt]
+      properties:
+        id:
+          type: integer
+        shipmentId:
+          type: integer
+        recipientName:
+          type: string
+        signatureUrl:
+          type: ["string", "null"]
+        photoUrl:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        deliveredAt:
+          type: string
+          format: date-time
+
     DashboardStats:
       type: object
       required: [total, pending, pickedUp, inTransit, outForDelivery, delivered, failed]
@@ -614,3 +1192,362 @@ components:
           type: integer
         failed:
           type: integer
+
+    Customer:
+      type: object
+      required: [id, name, email, status, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["string", "null"]
+        name:
+          type: string
+        email:
+          type: string
+        company:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CustomerInput:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        company:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+
+    CustomerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+
+    CustomerPortalRegisterInput:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        company:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+
+    PortalOverview:
+      type: object
+      required: [registered, customer, shipments, quotes, invoices]
+      properties:
+        registered:
+          type: boolean
+        customer:
+          oneOf:
+            - $ref: "#/components/schemas/Customer"
+            - type: "null"
+        shipments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Shipment"
+        quotes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Quote"
+        invoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invoice"
+
+    Driver:
+      type: object
+      required: [id, name, status, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["string", "null"]
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        licenseNumber:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [available, on_delivery, off_duty]
+        currentLocation:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DriverInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        phone:
+          type: string
+        licenseNumber:
+          type: string
+        currentLocation:
+          type: string
+
+    DriverUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        licenseNumber:
+          type: string
+        status:
+          type: string
+          enum: [available, on_delivery, off_duty]
+        currentLocation:
+          type: string
+
+    Quote:
+      type: object
+      required: [id, quoteNumber, origin, destination, serviceType, status, createdAt]
+      properties:
+        id:
+          type: integer
+        quoteNumber:
+          type: string
+        customerId:
+          type: ["integer", "null"]
+        origin:
+          type: string
+        destination:
+          type: string
+        serviceType:
+          type: string
+        weight:
+          type: ["number", "null"]
+        estimatedCost:
+          type: ["number", "null"]
+        status:
+          type: string
+          enum: [requested, reviewing, approved, rejected]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    QuoteInput:
+      type: object
+      required: [origin, destination]
+      properties:
+        origin:
+          type: string
+          minLength: 1
+        destination:
+          type: string
+          minLength: 1
+        serviceType:
+          type: string
+        weight:
+          type: number
+        estimatedCost:
+          type: number
+        notes:
+          type: string
+        customerId:
+          type: integer
+
+    QuoteUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [requested, reviewing, approved, rejected]
+        estimatedCost:
+          type: number
+        notes:
+          type: string
+
+    Invoice:
+      type: object
+      required: [id, invoiceNumber, amount, status, createdAt]
+      properties:
+        id:
+          type: integer
+        invoiceNumber:
+          type: string
+        customerId:
+          type: ["integer", "null"]
+        shipmentId:
+          type: ["integer", "null"]
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid, overdue, cancelled]
+        dueDate:
+          type: ["string", "null"]
+        paidAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    InvoiceInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        customerId:
+          type: integer
+        shipmentId:
+          type: integer
+        dueDate:
+          type: string
+
+    InvoiceUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, paid, overdue, cancelled]
+
+    Notification:
+      type: object
+      required: [id, userId, type, title, message, read, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    ReportsSummary:
+      type: object
+      required: [shipments, invoices, quotes, generatedAt]
+      properties:
+        shipments:
+          type: object
+          required: [total, delivered, inTransit]
+          properties:
+            total:
+              type: integer
+            delivered:
+              type: integer
+            inTransit:
+              type: integer
+        invoices:
+          type: object
+          required: [billed, paid, outstanding]
+          properties:
+            billed:
+              type: number
+            paid:
+              type: number
+            outstanding:
+              type: number
+        quotes:
+          type: object
+          required: [total, approved]
+          properties:
+            total:
+              type: integer
+            approved:
+              type: integer
+        generatedAt:
+          type: string
+          format: date-time
+
+    AdminUser:
+      type: object
+      required: [id, email, role, createdAt]
+      properties:
+        id:
+          type: string
+        email:
+          type: ["string", "null"]
+        firstName:
+          type: ["string", "null"]
+        lastName:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, staff, driver, customer]
+        createdAt:
+          type: string
+          format: date-time
+
+    UserRoleUpdate:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [admin, staff, driver, customer]

@@ -14,10 +14,16 @@ import ShipmentDetail from './pages/shipment-detail';
 import Track from './pages/track';
 import Login from './pages/login';
 import Home from './pages/home';
+import Portal from './pages/portal';
+import Quotes from './pages/quotes';
+import Invoices from './pages/invoices';
+import Drivers from './pages/drivers';
+import Admin from './pages/admin';
+import Reports from './pages/reports';
+import Customers from './pages/customers';
 
 const queryClient = new QueryClient();
 
-// A wrapper to protect routes that require authentication
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
@@ -29,7 +35,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   }, [isLoading, isAuthenticated, setLocation]);
 
   if (isLoading || !isAuthenticated) {
-    return null; // Layout handles the global loading state
+    return null;
   }
 
   return <Component />;
@@ -40,16 +46,13 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/track" component={Track} />
-      
-      {/* Protected routes wrapped in Layout */}
-      <Route path="/dashboard">
-        <Layout><ProtectedRoute component={Dashboard} /></Layout>
-      </Route>
+
       <Route path="/">
         <Home />
       </Route>
-      <Route path="/shipments">
-        <Layout><ProtectedRoute component={Shipments} /></Layout>
+
+      <Route path="/dashboard">
+        <Layout><ProtectedRoute component={Dashboard} /></Layout>
       </Route>
       <Route path="/shipments/new">
         <Layout><ProtectedRoute component={NewShipment} /></Layout>
@@ -57,7 +60,31 @@ function Router() {
       <Route path="/shipments/:id">
         <Layout><ProtectedRoute component={ShipmentDetail} /></Layout>
       </Route>
-      
+      <Route path="/shipments">
+        <Layout><ProtectedRoute component={Shipments} /></Layout>
+      </Route>
+      <Route path="/portal">
+        <Layout><ProtectedRoute component={Portal} /></Layout>
+      </Route>
+      <Route path="/quotes">
+        <Layout><ProtectedRoute component={Quotes} /></Layout>
+      </Route>
+      <Route path="/invoices">
+        <Layout><ProtectedRoute component={Invoices} /></Layout>
+      </Route>
+      <Route path="/customers">
+        <Layout><ProtectedRoute component={Customers} /></Layout>
+      </Route>
+      <Route path="/drivers">
+        <Layout><ProtectedRoute component={Drivers} /></Layout>
+      </Route>
+      <Route path="/reports">
+        <Layout><ProtectedRoute component={Reports} /></Layout>
+      </Route>
+      <Route path="/admin">
+        <Layout><ProtectedRoute component={Admin} /></Layout>
+      </Route>
+
       <Route>
         <Layout><NotFound /></Layout>
       </Route>

@@ -6,6 +6,8 @@ import {
   useListShipmentEvents, 
   useAddTrackingEvent,
   useDeleteShipment,
+  useSubmitProofOfDelivery,
+  useGetMe,
   getGetShipmentQueryKey,
   getListShipmentEventsQueryKey,
   getListShipmentsQueryKey
@@ -13,7 +15,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   ArrowLeft, Package, MapPin, Clock, Scale, Calendar, Trash2,
-  CheckCircle2, Plus, Loader2, AlertCircle, FileText, Truck
+  CheckCircle2, Plus, Loader2, AlertCircle, FileText, Truck, ClipboardCheck
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -37,9 +39,16 @@ export default function ShipmentDetail() {
   const { data: shipment, isLoading: isShipmentLoading } = useGetShipment(id, { query: { enabled: !!id, queryKey: getGetShipmentQueryKey(id) } });
   const { data: events, isLoading: isEventsLoading } = useListShipmentEvents(id, { query: { enabled: !!id, queryKey: getListShipmentEventsQueryKey(id) } });
 
+  const { data: me } = useGetMe();
+  const isStaff = me?.role === "staff" || me?.role === "admin";
+
   const updateShipment = useUpdateShipment();
   const addEvent = useAddTrackingEvent();
   const deleteShipment = useDeleteShipment();
+  const submitPod = useSubmitProofOfDelivery();
+
+  const [podForm, setPodForm] = useState({ recipientName: "", notes: "" });
+  const [podSubmitted, setPodSubmitted] = useState(false);
 
   const [eventForm, setEventForm] = useState({
     status: 'in_transit' as TrackingEventInputStatus,
@@ -69,6 +78,13 @@ export default function ShipmentDetail() {
         }
       }
     );
+  };
+
+  const handlePod = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitPod.mutateAsync({ id, data: { recipientName: podForm.recipientName, notes: podForm.notes || undefined } });
+    setPodSubmitted(true);
+    queryClient.invalidateQueries({ queryKey: getGetShipmentQueryKey(id) });
   };
 
   const handleAddEvent = (e: React.FormEvent) => {
@@ -241,6 +257,42 @@ export default function ShipmentDetail() {
             </form>
           </div>
         </div>
+
+        {/* Proof of Delivery */}
+        {isStaff && shipment.status !== "delivered" && (
+          <div className="bg-card border border-card-border rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <ClipboardCheck className="h-5 w-5 text-primary" />
+              Proof of Delivery
+            </h3>
+            {podSubmitted ? (
+              <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-md p-4 text-sm">
+                <CheckCircle2 className="h-5 w-5 shrink-0" />
+                Delivery confirmed. Shipment marked as delivered.
+              </div>
+            ) : (
+              <form onSubmit={handlePod} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Recipient Name <span className="text-red-500">*</span></label>
+                  <input required placeholder="Name of person who received the package"
+                    value={podForm.recipientName} onChange={e => setPodForm(p => ({ ...p, recipientName: e.target.value }))}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Notes (optional)</label>
+                  <input placeholder="e.g. Left at reception desk"
+                    value={podForm.notes} onChange={e => setPodForm(p => ({ ...p, notes: e.target.value }))}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                </div>
+                <button type="submit" disabled={submitPod.isPending}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-60">
+                  {submitPod.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ClipboardCheck className="h-4 w-4" />}
+                  {submitPod.isPending ? "Recording…" : "Confirm Delivery"}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
 
         {/* Timeline */}
         <div className="lg:col-span-1">

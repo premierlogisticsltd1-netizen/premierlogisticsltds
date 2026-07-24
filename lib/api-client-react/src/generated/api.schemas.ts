@@ -51,6 +51,27 @@ export interface ErrorEnvelope {
   error: string;
 }
 
+export type UserProfileRole = typeof UserProfileRole[keyof typeof UserProfileRole];
+
+
+export const UserProfileRole = {
+  admin: 'admin',
+  staff: 'staff',
+  driver: 'driver',
+  customer: 'customer',
+} as const;
+
+export interface UserProfile {
+  id: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  firstName?: string | null;
+  /** @nullable */
+  lastName?: string | null;
+  role: UserProfileRole;
+}
+
 export type ShipmentStatus = typeof ShipmentStatus[keyof typeof ShipmentStatus];
 
 
@@ -166,6 +187,37 @@ export interface TrackingResult {
   events: TrackingEvent[];
 }
 
+export interface AssignDriverInput {
+  driverId: number;
+}
+
+export interface AssignDriverResult {
+  shipment: Shipment;
+  driverId: number;
+  message: string;
+}
+
+export interface ProofOfDeliveryInput {
+  /** @minLength 1 */
+  recipientName: string;
+  signatureUrl?: string;
+  photoUrl?: string;
+  notes?: string;
+}
+
+export interface ProofOfDelivery {
+  id: number;
+  shipmentId: number;
+  recipientName: string;
+  /** @nullable */
+  signatureUrl?: string | null;
+  /** @nullable */
+  photoUrl?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  deliveredAt: string;
+}
+
 export interface DashboardStats {
   total: number;
   pending: number;
@@ -174,6 +226,308 @@ export interface DashboardStats {
   outForDelivery: number;
   delivered: number;
   failed: number;
+}
+
+export type CustomerStatus = typeof CustomerStatus[keyof typeof CustomerStatus];
+
+
+export const CustomerStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  suspended: 'suspended',
+} as const;
+
+export interface Customer {
+  id: number;
+  /** @nullable */
+  userId?: string | null;
+  name: string;
+  email: string;
+  /** @nullable */
+  company?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  address?: string | null;
+  status: CustomerStatus;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CustomerInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  email: string;
+  company?: string;
+  phone?: string;
+  address?: string;
+}
+
+export type CustomerUpdateStatus = typeof CustomerUpdateStatus[keyof typeof CustomerUpdateStatus];
+
+
+export const CustomerUpdateStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  suspended: 'suspended',
+} as const;
+
+export interface CustomerUpdate {
+  name?: string;
+  company?: string;
+  phone?: string;
+  address?: string;
+  status?: CustomerUpdateStatus;
+}
+
+export interface CustomerPortalRegisterInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  email: string;
+  company?: string;
+  phone?: string;
+  address?: string;
+}
+
+export type QuoteStatus = typeof QuoteStatus[keyof typeof QuoteStatus];
+
+
+export const QuoteStatus = {
+  requested: 'requested',
+  reviewing: 'reviewing',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface Quote {
+  id: number;
+  quoteNumber: string;
+  /** @nullable */
+  customerId?: number | null;
+  origin: string;
+  destination: string;
+  serviceType: string;
+  /** @nullable */
+  weight?: number | null;
+  /** @nullable */
+  estimatedCost?: number | null;
+  status: QuoteStatus;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type InvoiceStatus = typeof InvoiceStatus[keyof typeof InvoiceStatus];
+
+
+export const InvoiceStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  overdue: 'overdue',
+  cancelled: 'cancelled',
+} as const;
+
+export interface Invoice {
+  id: number;
+  invoiceNumber: string;
+  /** @nullable */
+  customerId?: number | null;
+  /** @nullable */
+  shipmentId?: number | null;
+  amount: number;
+  currency?: string;
+  status: InvoiceStatus;
+  /** @nullable */
+  dueDate?: string | null;
+  /** @nullable */
+  paidAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface PortalOverview {
+  registered: boolean;
+  customer: Customer | null;
+  shipments: Shipment[];
+  quotes: Quote[];
+  invoices: Invoice[];
+}
+
+export type DriverStatus = typeof DriverStatus[keyof typeof DriverStatus];
+
+
+export const DriverStatus = {
+  available: 'available',
+  on_delivery: 'on_delivery',
+  off_duty: 'off_duty',
+} as const;
+
+export interface Driver {
+  id: number;
+  /** @nullable */
+  userId?: string | null;
+  name: string;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  licenseNumber?: string | null;
+  status: DriverStatus;
+  /** @nullable */
+  currentLocation?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface DriverInput {
+  /** @minLength 1 */
+  name: string;
+  email?: string;
+  phone?: string;
+  licenseNumber?: string;
+  currentLocation?: string;
+}
+
+export type DriverUpdateStatus = typeof DriverUpdateStatus[keyof typeof DriverUpdateStatus];
+
+
+export const DriverUpdateStatus = {
+  available: 'available',
+  on_delivery: 'on_delivery',
+  off_duty: 'off_duty',
+} as const;
+
+export interface DriverUpdate {
+  name?: string;
+  email?: string;
+  phone?: string;
+  licenseNumber?: string;
+  status?: DriverUpdateStatus;
+  currentLocation?: string;
+}
+
+export interface QuoteInput {
+  /** @minLength 1 */
+  origin: string;
+  /** @minLength 1 */
+  destination: string;
+  serviceType?: string;
+  weight?: number;
+  estimatedCost?: number;
+  notes?: string;
+  customerId?: number;
+}
+
+export type QuoteUpdateStatus = typeof QuoteUpdateStatus[keyof typeof QuoteUpdateStatus];
+
+
+export const QuoteUpdateStatus = {
+  requested: 'requested',
+  reviewing: 'reviewing',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface QuoteUpdate {
+  status?: QuoteUpdateStatus;
+  estimatedCost?: number;
+  notes?: string;
+}
+
+export interface InvoiceInput {
+  /** @minimum 0 */
+  amount: number;
+  customerId?: number;
+  shipmentId?: number;
+  dueDate?: string;
+}
+
+export type InvoiceUpdateStatus = typeof InvoiceUpdateStatus[keyof typeof InvoiceUpdateStatus];
+
+
+export const InvoiceUpdateStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  overdue: 'overdue',
+  cancelled: 'cancelled',
+} as const;
+
+export interface InvoiceUpdate {
+  status?: InvoiceUpdateStatus;
+}
+
+export interface Notification {
+  id: number;
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export type ReportsSummaryShipments = {
+  total: number;
+  delivered: number;
+  inTransit: number;
+};
+
+export type ReportsSummaryInvoices = {
+  billed: number;
+  paid: number;
+  outstanding: number;
+};
+
+export type ReportsSummaryQuotes = {
+  total: number;
+  approved: number;
+};
+
+export interface ReportsSummary {
+  shipments: ReportsSummaryShipments;
+  invoices: ReportsSummaryInvoices;
+  quotes: ReportsSummaryQuotes;
+  generatedAt: string;
+}
+
+export type AdminUserRole = typeof AdminUserRole[keyof typeof AdminUserRole];
+
+
+export const AdminUserRole = {
+  admin: 'admin',
+  staff: 'staff',
+  driver: 'driver',
+  customer: 'customer',
+} as const;
+
+export interface AdminUser {
+  id: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  firstName?: string | null;
+  /** @nullable */
+  lastName?: string | null;
+  role: AdminUserRole;
+  createdAt: string;
+}
+
+export type UserRoleUpdateRole = typeof UserRoleUpdateRole[keyof typeof UserRoleUpdateRole];
+
+
+export const UserRoleUpdateRole = {
+  admin: 'admin',
+  staff: 'staff',
+  driver: 'driver',
+  customer: 'customer',
+} as const;
+
+export interface UserRoleUpdate {
+  role: UserRoleUpdateRole;
 }
 
 /**
