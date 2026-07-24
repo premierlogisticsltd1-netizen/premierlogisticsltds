@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useListShipments } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { Search, Filter, Loader2, Package, MoreHorizontal, MapPin } from "lucide-react";
 import { format } from "date-fns";
-import type { ListShipmentsStatus } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { ListShipmentsStatus } from "@workspace/api-client-react";
 
 const STATUS_TABS: { label: string; value: ListShipmentsStatus | 'all' }[] = [
   { label: 'All', value: 'all' },
@@ -21,7 +21,7 @@ export default function Shipments() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // Simple debounce
-  useState(() => {
+  useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(handler);
   }, [search]);

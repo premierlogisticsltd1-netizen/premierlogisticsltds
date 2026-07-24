@@ -47,7 +47,7 @@ export default function NewShipment() {
         onError: (error) => {
           toast({
             title: "Error",
-            description: error.error || "Failed to create shipment",
+            description: error.data?.error || error.message || "Failed to create shipment",
             variant: "destructive"
           });
         }

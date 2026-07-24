@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTrackShipment } from "@workspace/api-client-react";
+import { getTrackShipmentQueryKey, useTrackShipment } from "@workspace/api-client-react";
 import { Search, Package, MapPin, Truck, CheckCircle2, AlertCircle, Calendar, ArrowRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -8,7 +8,7 @@ export default function Track() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: trackResult, isLoading, isError, error } = useTrackShipment(searchQuery, {
-    query: { enabled: !!searchQuery, retry: false }
+    query: { enabled: !!searchQuery, retry: false, queryKey: getTrackShipmentQueryKey(searchQuery) }
   });
 
   const handleSearch = (e: React.FormEvent) => {

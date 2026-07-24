@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import type { ShipmentUpdateStatus, TrackingEventInputStatus } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { ShipmentUpdateStatus, TrackingEventInputStatus } from "@workspace/api-client-react";
 
 const STATUS_OPTIONS: { label: string; value: ShipmentUpdateStatus }[] = [
   { label: 'Pending', value: 'pending' },
@@ -75,8 +75,8 @@ export default function ShipmentDetail() {
     e.preventDefault();
     addEvent.mutate(
       {
+        id,
         data: {
-          shipmentId: id,
           status: eventForm.status,
           location: eventForm.location,
           notes: eventForm.notes || undefined,
