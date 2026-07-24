@@ -1,0 +1,64 @@
+1:34:41 AM: Netlify Build                                                 
+1:34:41 AM: ────────────────────────────────────────────────────────────────
+1:34:41 AM: ​
+1:34:41 AM: ❯ Version
+1:34:41 AM:   @netlify/build 36.2.1
+1:34:41 AM: ​
+1:34:41 AM: ❯ Flags
+1:34:41 AM:   accountId: 6a63de0d1958585d4f312bcb
+1:34:41 AM:   baseRelDir: true
+1:34:41 AM:   buildId: 6a63e875cc47025104ddc6dc
+1:34:41 AM:   deployId: 6a63e875cc47025104ddc6de
+1:34:41 AM: ​
+1:34:41 AM: ❯ Current directory
+1:34:41 AM:   /opt/build/repo
+1:34:41 AM: ​
+1:34:41 AM: ❯ Config file
+1:34:41 AM:   /opt/build/repo/netlify.toml
+1:34:41 AM: ​
+1:34:41 AM: ❯ Context
+1:34:41 AM:   production
+1:34:41 AM: ​
+1:34:41 AM: build.command from netlify.toml                               
+1:34:41 AM: ────────────────────────────────────────────────────────────────
+1:34:41 AM: ​
+1:34:41 AM: $ pnpm --filter @workspace/web... run build
+1:34:42 AM: Failed during stage 'building site': Build script returned non-zero exit code: 2 (https://ntl.fyi/exit-code-2)
+1:34:42 AM: Scope: 3 of 10 workspace projects
+1:34:42 AM: artifacts/web build$ vite build --config vite.config.ts
+1:34:42 AM: artifacts/web build: failed to load config from /opt/build/repo/artifacts/web/vite.config.ts
+1:34:42 AM: artifacts/web build: error during build:
+1:34:42 AM: artifacts/web build: Error: PORT environment variable is required but was not provided.
+1:34:42 AM: artifacts/web build:     at file:///opt/build/repo/artifacts/web/node_modules/.vite-temp/vite.config.ts.timestamp-1784932482348-05da1fc8019078.mjs:10:9
+1:34:42 AM: artifacts/web build:     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+1:34:42 AM: artifacts/web build:     at async node:internal/modules/esm/loader:643:26
+1:34:42 AM: artifacts/web build:     at async loadConfigFromBundledFile (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.6_@types+node@25.9.5_jiti@2.7.0_lightningcss@1.32.0_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/chunks/config.js:35996:12)
+1:34:42 AM: artifacts/web build:     at async bundleAndLoadConfigFile (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.6_@types+node@25.9.5_jiti@2.7.0_lightningcss@1.32.0_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/chunks/config.js:35884:17)
+1:34:42 AM: artifacts/web build:     at async loadConfigFromFile (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.6_@types+node@25.9.5_jiti@2.7.0_lightningcss@1.32.0_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/chunks/config.js:35851:42)
+1:34:42 AM: artifacts/web build:     at async resolveConfig (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.6_@types+node@25.9.5_jiti@2.7.0_lightningcss@1.32.0_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/chunks/config.js:35500:22)
+1:34:42 AM: artifacts/web build:     at async createBuilder (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.6_@types+node@25.9.5_jiti@2.7.0_lightningcss@1.32.0_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/chunks/config.js:33955:19)
+1:34:42 AM: artifacts/web build:     at async CAC.<anonymous> (file:///opt/build/repo/node_modules/.pnpm/vite@7.3.6_@types+node@25.9.5_jiti@2.7.0_lightningcss@1.32.0_tsx@4.23.1_yaml@2.9.0/node_modules/vite/dist/node/cli.js:629:10)
+1:34:42 AM: artifacts/web build: Failed
+1:34:42 AM: /opt/build/repo/artifacts/web:
+1:34:42 AM:  ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/web@0.0.0 build: `vite build --config vite.config.ts`
+1:34:42 AM: Exit status 1
+1:34:42 AM: ​
+1:34:42 AM: "build.command" failed                                        
+1:34:42 AM: ────────────────────────────────────────────────────────────────
+1:34:42 AM: ​
+1:34:42 AM:   Error message
+1:34:42 AM:   Command failed with exit code 1: pnpm --filter @workspace/web... run build (https://ntl.fyi/exit-code-1)
+1:34:42 AM: ​
+1:34:42 AM:   Error location
+1:34:42 AM:   In build.command from netlify.toml:
+1:34:42 AM:   pnpm --filter @workspace/web... run build
+1:34:42 AM: ​
+1:34:42 AM:   Resolved config
+1:34:42 AM:   build:
+1:34:42 AM:     command: pnpm --filter @workspace/web... run build
+1:34:42 AM:     commandOrigin: config
+1:34:42 AM:     publish: /opt/build/repo/artifacts/web/dist
+1:34:42 AM:     publishOrigin: config
+1:34:42 AM: Build failed due to a user error: Build script returned non-zero exit code: 2
+1:34:42 AM: Failing build: Failed to build site
+1:34:43 AM: Finished processing build request in 13.328s
