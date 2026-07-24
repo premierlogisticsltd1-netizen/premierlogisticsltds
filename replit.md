@@ -1,6 +1,6 @@
-# [Project name]
+# API Server
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A backend API scaffold built with Express 5, TypeScript, PostgreSQL, and Drizzle ORM. Ready to extend with routes, schema, and business logic.
 
 ## Run & Operate
 
@@ -9,7 +9,8 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL` — Postgres connection string (injected automatically by Replit; no manual setup needed)
+- Workflow: **API Server** — runs `PORT=8080 pnpm --filter @workspace/api-server run dev`; verify at `GET /api/healthz` → `{"status":"ok"}`
 
 ## Stack
 
