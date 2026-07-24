@@ -465,6 +465,9 @@ export const GetPortalOverviewResponse = zod.object({
   "id": zod.number(),
   "quoteNumber": zod.string(),
   "customerId": zod.number().nullish(),
+  "contactName": zod.string().nullish(),
+  "contactEmail": zod.string().nullish(),
+  "contactPhone": zod.string().nullish(),
   "origin": zod.string(),
   "destination": zod.string(),
   "serviceType": zod.string(),
@@ -644,12 +647,53 @@ export const UpdateDriverResponse = zod.object({
 
 
 /**
+ * @summary Submit a public quote request
+ */
+
+
+
+
+
+export const CreatePublicQuoteBody = zod.object({
+  "contactName": zod.string().min(1),
+  "contactEmail": zod.string().describe('Email address for quote follow-up'),
+  "contactPhone": zod.string().optional(),
+  "origin": zod.string().min(1),
+  "destination": zod.string().min(1),
+  "serviceType": zod.string().optional(),
+  "weight": zod.number().optional(),
+  "notes": zod.string().optional()
+})
+
+export const CreatePublicQuoteResponse = zod.object({
+  "id": zod.number(),
+  "quoteNumber": zod.string(),
+  "customerId": zod.number().nullish(),
+  "contactName": zod.string().nullish(),
+  "contactEmail": zod.string().nullish(),
+  "contactPhone": zod.string().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "serviceType": zod.string(),
+  "weight": zod.number().nullish(),
+  "estimatedCost": zod.number().nullish(),
+  "status": zod.enum(['requested', 'reviewing', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+
+
+/**
  * @summary List quotes (staff/admin see all; customers see their own)
  */
 export const ListQuotesResponseItem = zod.object({
   "id": zod.number(),
   "quoteNumber": zod.string(),
   "customerId": zod.number().nullish(),
+  "contactName": zod.string().nullish(),
+  "contactEmail": zod.string().nullish(),
+  "contactPhone": zod.string().nullish(),
   "origin": zod.string(),
   "destination": zod.string(),
   "serviceType": zod.string(),
@@ -684,6 +728,9 @@ export const CreateQuoteResponse = zod.object({
   "id": zod.number(),
   "quoteNumber": zod.string(),
   "customerId": zod.number().nullish(),
+  "contactName": zod.string().nullish(),
+  "contactEmail": zod.string().nullish(),
+  "contactPhone": zod.string().nullish(),
   "origin": zod.string(),
   "destination": zod.string(),
   "serviceType": zod.string(),
@@ -713,6 +760,9 @@ export const UpdateQuoteResponse = zod.object({
   "id": zod.number(),
   "quoteNumber": zod.string(),
   "customerId": zod.number().nullish(),
+  "contactName": zod.string().nullish(),
+  "contactEmail": zod.string().nullish(),
+  "contactPhone": zod.string().nullish(),
   "origin": zod.string(),
   "destination": zod.string(),
   "serviceType": zod.string(),

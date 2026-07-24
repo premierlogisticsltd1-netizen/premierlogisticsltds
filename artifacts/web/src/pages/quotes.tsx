@@ -125,6 +125,7 @@ export default function Quotes() {
             <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Quote #</th>
+                {isStaff && <th className="px-6 py-4 font-medium">Contact</th>}
                 <th className="px-6 py-4 font-medium">Route</th>
                 <th className="px-6 py-4 font-medium">Service</th>
                 <th className="px-6 py-4 font-medium">Est. Cost</th>
@@ -137,6 +138,13 @@ export default function Quotes() {
               {quotes.map(q => (
                 <tr key={q.id} className="hover:bg-muted/30">
                   <td className="px-6 py-4 font-mono font-medium text-primary">{q.quoteNumber}</td>
+                  {isStaff && (
+                    <td className="px-6 py-4">
+                      <div className="font-medium">{q.contactName ?? "Account request"}</div>
+                      {q.contactEmail && <div className="text-muted-foreground text-xs">{q.contactEmail}</div>}
+                      {q.contactPhone && <div className="text-muted-foreground text-xs">{q.contactPhone}</div>}
+                    </td>
+                  )}
                   <td className="px-6 py-4">
                     <div className="font-medium">{q.origin}</div>
                     <div className="text-muted-foreground text-xs">→ {q.destination}</div>

@@ -12,6 +12,12 @@ export interface Quote {
   quoteNumber: string;
   /** @nullable */
   customerId?: number | null;
+  /** @nullable */
+  contactName?: string | null;
+  /** @nullable */
+  contactEmail?: string | null;
+  /** @nullable */
+  contactPhone?: string | null;
   origin: string;
   destination: string;
   serviceType: string;

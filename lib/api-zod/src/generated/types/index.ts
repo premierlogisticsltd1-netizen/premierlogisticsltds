@@ -44,6 +44,7 @@ export * from './notification';
 export * from './portalOverview';
 export * from './proofOfDelivery';
 export * from './proofOfDeliveryInput';
+export * from './publicQuoteInput';
 export * from './quote';
 export * from './quoteInput';
 export * from './quoteStatus';

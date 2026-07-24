@@ -84,6 +84,33 @@ router.get("/quotes", staff, async (_req, res): Promise<void> => {
   res.json(await db.select().from(quotesTable).orderBy(desc(quotesTable.createdAt)));
 });
 
+router.post("/public/quotes", async (req, res): Promise<void> => {
+  const contactName = bodyString(req.body?.contactName);
+  const contactEmail = bodyString(req.body?.contactEmail).toLowerCase();
+  const origin = bodyString(req.body?.origin);
+  const destination = bodyString(req.body?.destination);
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail);
+
+  if (!contactName || !contactEmail || !emailIsValid || !origin || !destination) {
+    res.status(400).json({ error: "Name, valid email, origin, and destination are required" });
+    return;
+  }
+
+  const [quote] = await db.insert(quotesTable).values({
+    quoteNumber: number("QUO"),
+    contactName,
+    contactEmail,
+    contactPhone: bodyString(req.body?.contactPhone) || null,
+    origin,
+    destination,
+    serviceType: bodyString(req.body?.serviceType, "standard"),
+    weight: Number.isFinite(bodyNumber(req.body?.weight)) ? bodyNumber(req.body?.weight) : null,
+    notes: bodyString(req.body?.notes) || null,
+  }).returning();
+
+  res.status(201).json(quote);
+});
+
 router.post("/quotes", requireAuth, async (req, res): Promise<void> => {
   const origin = bodyString(req.body?.origin), destination = bodyString(req.body?.destination);
   if (!origin || !destination) { res.status(400).json({ error: "Origin and destination are required" }); return; }

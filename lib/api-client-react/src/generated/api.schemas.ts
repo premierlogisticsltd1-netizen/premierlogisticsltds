@@ -306,6 +306,12 @@ export interface Quote {
   quoteNumber: string;
   /** @nullable */
   customerId?: number | null;
+  /** @nullable */
+  contactName?: string | null;
+  /** @nullable */
+  contactEmail?: string | null;
+  /** @nullable */
+  contactPhone?: string | null;
   origin: string;
   destination: string;
   serviceType: string;
@@ -420,6 +426,21 @@ export interface QuoteInput {
   estimatedCost?: number;
   notes?: string;
   customerId?: number;
+}
+
+export interface PublicQuoteInput {
+  /** @minLength 1 */
+  contactName: string;
+  /** Email address for quote follow-up */
+  contactEmail: string;
+  contactPhone?: string;
+  /** @minLength 1 */
+  origin: string;
+  /** @minLength 1 */
+  destination: string;
+  serviceType?: string;
+  weight?: number;
+  notes?: string;
 }
 
 export type QuoteUpdateStatus = typeof QuoteUpdateStatus[keyof typeof QuoteUpdateStatus];

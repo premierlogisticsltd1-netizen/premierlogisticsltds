@@ -48,6 +48,7 @@ import type {
   PortalOverview,
   ProofOfDelivery,
   ProofOfDeliveryInput,
+  PublicQuoteInput,
   Quote,
   QuoteInput,
   QuoteUpdate,
@@ -2123,6 +2124,77 @@ export const useUpdateDriver = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getUpdateDriverMutationOptions(options));
+    }
+
+export const getCreatePublicQuoteUrl = () => {
+
+
+
+
+  return `/api/public/quotes`
+}
+
+/**
+ * @summary Submit a public quote request
+ */
+export const createPublicQuote = async (publicQuoteInput: PublicQuoteInput, options?: RequestInit): Promise<Quote> => {
+
+  return customFetch<Quote>(getCreatePublicQuoteUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(publicQuoteInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePublicQuoteMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPublicQuote>>, TError,{data: BodyType<PublicQuoteInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPublicQuote>>, TError,{data: BodyType<PublicQuoteInput>}, TContext> => {
+
+const mutationKey = ['createPublicQuote'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPublicQuote>>, {data: BodyType<PublicQuoteInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPublicQuote(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePublicQuoteMutationResult = NonNullable<Awaited<ReturnType<typeof createPublicQuote>>>
+    export type CreatePublicQuoteMutationBody = BodyType<PublicQuoteInput>
+    export type CreatePublicQuoteMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Submit a public quote request
+ */
+export const useCreatePublicQuote = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPublicQuote>>, TError,{data: BodyType<PublicQuoteInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createPublicQuote>>,
+        TError,
+        {data: BodyType<PublicQuoteInput>},
+        TContext
+      > => {
+      return useMutation(getCreatePublicQuoteMutationOptions(options));
     }
 
 export const getListQuotesUrl = () => {

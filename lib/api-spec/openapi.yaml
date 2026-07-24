@@ -638,6 +638,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /public/quotes:
+    post:
+      operationId: createPublicQuote
+      tags: [quotes]
+      summary: Submit a public quote request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublicQuoteInput"
+      responses:
+        "201":
+          description: Quote created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /quotes:
     get:
       operationId: listQuotes
@@ -1364,6 +1389,12 @@ components:
           type: string
         customerId:
           type: ["integer", "null"]
+        contactName:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+        contactPhone:
+          type: ["string", "null"]
         origin:
           type: string
         destination:
@@ -1406,6 +1437,31 @@ components:
           type: string
         customerId:
           type: integer
+
+    PublicQuoteInput:
+      type: object
+      required: [contactName, contactEmail, origin, destination]
+      properties:
+        contactName:
+          type: string
+          minLength: 1
+        contactEmail:
+          type: string
+          description: Email address for quote follow-up
+        contactPhone:
+          type: string
+        origin:
+          type: string
+          minLength: 1
+        destination:
+          type: string
+          minLength: 1
+        serviceType:
+          type: string
+        weight:
+          type: number
+        notes:
+          type: string
 
     QuoteUpdate:
       type: object

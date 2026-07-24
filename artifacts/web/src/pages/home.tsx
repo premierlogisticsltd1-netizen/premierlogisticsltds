@@ -9,6 +9,8 @@ import {
   Truck,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
+import { useCreatePublicQuote } from "@workspace/api-client-react";
 
 const services = [
   {
@@ -35,6 +37,58 @@ const steps = [
 ];
 
 export default function Home() {
+  const { mutateAsync: createPublicQuote, isPending: submitting } = useCreatePublicQuote();
+  const [submittedQuote, setSubmittedQuote] = useState<string | null>(null);
+  const [quoteError, setQuoteError] = useState("");
+  const [quoteForm, setQuoteForm] = useState({
+    contactName: "",
+    contactEmail: "",
+    contactPhone: "",
+    origin: "",
+    destination: "",
+    serviceType: "standard",
+    weight: "",
+    notes: "",
+  });
+
+  function updateQuoteField(field: keyof typeof quoteForm, value: string) {
+    setQuoteForm((current) => ({ ...current, [field]: value }));
+  }
+
+  async function handleQuoteSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setQuoteError("");
+    setSubmittedQuote(null);
+
+    try {
+      const quote = await createPublicQuote({
+        data: {
+          contactName: quoteForm.contactName,
+          contactEmail: quoteForm.contactEmail,
+          contactPhone: quoteForm.contactPhone || undefined,
+          origin: quoteForm.origin,
+          destination: quoteForm.destination,
+          serviceType: quoteForm.serviceType,
+          weight: quoteForm.weight ? Number(quoteForm.weight) : undefined,
+          notes: quoteForm.notes || undefined,
+        },
+      });
+      setSubmittedQuote(quote.quoteNumber);
+      setQuoteForm({
+        contactName: "",
+        contactEmail: "",
+        contactPhone: "",
+        origin: "",
+        destination: "",
+        serviceType: "standard",
+        weight: "",
+        notes: "",
+      });
+    } catch {
+      setQuoteError("We couldn't submit your request. Please check your details and try again.");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f7f7f5] text-[#111113]">
       <header className="sticky top-0 z-30 border-b border-black/10 bg-[#f7f7f5]/95 backdrop-blur">
@@ -193,7 +247,87 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Ready when you are</p>
               <h2 className="mt-4 max-w-xl text-4xl font-bold tracking-[-0.04em] sm:text-5xl">Let’s move your next shipment forward.</h2>
               <p className="mt-5 max-w-lg text-lg leading-8 text-white/75">Tell us where it needs to go. Our team will help you find the right route and service.</p>
-              <a href="mailto:hello@premierlogistics.example" className="mt-8 inline-flex items-center gap-2 rounded-md bg-[#111113] px-6 py-3.5 font-semibold transition hover:bg-white hover:text-[#111113]">Request a quote <ArrowRight className="h-4 w-4" /></a>
+              {submittedQuote ? (
+                <div className="mt-8 rounded-xl bg-white/15 p-5">
+                  <p className="font-bold">Quote request received.</p>
+                  <p className="mt-1 text-sm text-white/80">Reference {submittedQuote}. Our team will follow up shortly.</p>
+                  <button
+                    type="button"
+                    onClick={() => setSubmittedQuote(null)}
+                    className="mt-4 text-sm font-bold underline underline-offset-4"
+                  >
+                    Submit another request
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleQuoteSubmit} className="mt-8 max-w-2xl rounded-xl bg-white p-5 text-[#111113] sm:p-6">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {[
+                      { field: "contactName", label: "Your name", placeholder: "Alex Morgan", required: true },
+                      { field: "contactEmail", label: "Email", placeholder: "alex@company.com", type: "email", required: true },
+                      { field: "contactPhone", label: "Phone", placeholder: "+44 20 1234 5678", type: "tel" },
+                      { field: "origin", label: "Pickup location", placeholder: "London, UK", required: true },
+                      { field: "destination", label: "Delivery location", placeholder: "New York, US", required: true },
+                    ].map(({ field, label, placeholder, type, required }) => (
+                      <label key={field} className="block text-sm font-medium">
+                        {label}
+                        <input
+                          type={type ?? "text"}
+                          required={required}
+                          value={quoteForm[field as keyof typeof quoteForm]}
+                          onChange={(event) => updateQuoteField(field as keyof typeof quoteForm, event.target.value)}
+                          placeholder={placeholder}
+                          className="mt-1.5 w-full rounded-md border border-black/15 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-[#ff6208] focus:ring-2 focus:ring-[#ff6208]/20"
+                        />
+                      </label>
+                    ))}
+                    <label className="block text-sm font-medium">
+                      Service
+                      <select
+                        value={quoteForm.serviceType}
+                        onChange={(event) => updateQuoteField("serviceType", event.target.value)}
+                        className="mt-1.5 w-full rounded-md border border-black/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#ff6208] focus:ring-2 focus:ring-[#ff6208]/20"
+                      >
+                        <option value="standard">Standard</option>
+                        <option value="express">Express</option>
+                        <option value="overnight">Overnight</option>
+                        <option value="freight">Freight</option>
+                      </select>
+                    </label>
+                    <label className="block text-sm font-medium">
+                      Weight (kg)
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        value={quoteForm.weight}
+                        onChange={(event) => updateQuoteField("weight", event.target.value)}
+                        placeholder="Optional"
+                        className="mt-1.5 w-full rounded-md border border-black/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#ff6208] focus:ring-2 focus:ring-[#ff6208]/20"
+                      />
+                    </label>
+                  </div>
+                  <label className="mt-4 block text-sm font-medium">
+                    Shipment details
+                    <textarea
+                      rows={3}
+                      value={quoteForm.notes}
+                      onChange={(event) => updateQuoteField("notes", event.target.value)}
+                      placeholder="Tell us anything important about the shipment."
+                      className="mt-1.5 w-full resize-none rounded-md border border-black/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#ff6208] focus:ring-2 focus:ring-[#ff6208]/20"
+                    />
+                  </label>
+                  {quoteError && <p className="mt-3 text-sm font-medium text-red-700">{quoteError}</p>}
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#111113] px-5 py-3 font-semibold text-white transition hover:bg-[#ff6208] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {submitting ? "Submitting…" : "Request a quote"}
+                    {!submitting && <ArrowRight className="h-4 w-4" />}
+                  </button>
+                </form>
+              )}
             </div>
             <div className="hidden min-w-[260px] items-end justify-end p-12 lg:flex">
               <MapPin className="h-44 w-44 text-white/20" strokeWidth={1} />
