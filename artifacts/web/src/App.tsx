@@ -13,6 +13,7 @@ import NewShipment from './pages/new-shipment';
 import ShipmentDetail from './pages/shipment-detail';
 import Track from './pages/track';
 import Login from './pages/login';
+import Home from './pages/home';
 
 const queryClient = new QueryClient();
 
@@ -41,8 +42,11 @@ function Router() {
       <Route path="/track" component={Track} />
       
       {/* Protected routes wrapped in Layout */}
-      <Route path="/">
+      <Route path="/dashboard">
         <Layout><ProtectedRoute component={Dashboard} /></Layout>
+      </Route>
+      <Route path="/">
+        <Home />
       </Route>
       <Route path="/shipments">
         <Layout><ProtectedRoute component={Shipments} /></Layout>

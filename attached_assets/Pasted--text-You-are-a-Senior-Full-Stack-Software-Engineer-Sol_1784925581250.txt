@@ -1,0 +1,587 @@
+```text
+You are a Senior Full Stack Software Engineer, Solution Architect, UI/UX Designer, DevOps Engineer, and Logistics Systems Expert.
+
+Your task is to build a production-ready, enterprise-grade courier and logistics management platform from scratch. Do NOT use WordPress, Laravel CMS, Shopify, or any website builders. Everything must be custom-built using modern web technologies.
+
+==================================================
+TECH STACK
+==================================================
+
+Frontend
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Framer Motion
+- React Hook Form
+- Zod
+- TanStack Query
+- Axios
+
+Backend
+- Node.js
+- NestJS (preferred) or Express.js
+- TypeScript
+- Prisma ORM
+
+Database
+- PostgreSQL
+
+Authentication
+- JWT Access Tokens
+- Refresh Tokens
+- Role-Based Access Control (RBAC)
+- Password Hashing (bcrypt)
+
+Storage
+- AWS S3 or Cloudinary
+
+Maps
+- Google Maps API
+
+Email
+- Nodemailer (SMTP)
+
+Notifications
+- Email
+- SMS (pluggable)
+- WhatsApp API (pluggable)
+
+Deployment
+- Frontend → Vercel
+- Backend → Railway or DigitalOcean
+- Database → Supabase PostgreSQL or Neon
+
+==================================================
+PROJECT NAME
+==================================================
+
+Premier Logistics Management Platform
+
+==================================================
+GOAL
+==================================================
+
+Develop a modern logistics management platform that is significantly more advanced than traditional WordPress courier websites.
+
+The platform must be scalable, secure, responsive, modular, and API-first.
+
+==================================================
+PUBLIC WEBSITE
+==================================================
+
+Create a beautiful corporate logistics website.
+
+Pages:
+
+Home
+
+About
+
+Services
+
+Industries Served
+
+Coverage Areas
+
+Track Shipment
+
+Book Shipment
+
+Request Quote
+
+Pricing
+
+FAQs
+
+Testimonials
+
+Blog
+
+Careers
+
+Contact
+
+Privacy Policy
+
+Terms
+
+==================================================
+HOME PAGE
+==================================================
+
+Hero Section
+
+Company Statistics
+
+Services
+
+Why Choose Us
+
+How Shipping Works
+
+Shipment Tracking Widget
+
+Coverage Map
+
+Testimonials
+
+Call to Action
+
+Partners
+
+Latest News
+
+Footer
+
+==================================================
+TRACK SHIPMENT
+==================================================
+
+Customer enters tracking number.
+
+System displays:
+
+Tracking Number
+
+Shipment Status
+
+Shipment Progress Bar
+
+Current Location
+
+Shipment Timeline
+
+Sender
+
+Receiver
+
+Origin
+
+Destination
+
+Expected Delivery
+
+Weight
+
+Dimensions
+
+Service Type
+
+Shipment History
+
+Proof of Delivery
+
+QR Code
+
+Map Location
+
+==================================================
+SHIPMENT TIMELINE
+==================================================
+
+Timeline should support unlimited updates.
+
+Example:
+
+Shipment Created
+
+↓
+
+Picked Up
+
+↓
+
+Sorting Facility
+
+↓
+
+In Transit
+
+↓
+
+Destination Hub
+
+↓
+
+Out for Delivery
+
+↓
+
+Delivered
+
+Each update stores:
+
+City
+
+Country
+
+Facility
+
+Latitude
+
+Longitude
+
+Date
+
+Time
+
+Description
+
+Status
+
+==================================================
+CUSTOMER PORTAL
+==================================================
+
+Customer Registration
+
+Login
+
+Forgot Password
+
+Dashboard
+
+Shipment History
+
+Book Shipment
+
+Saved Addresses
+
+Saved Receivers
+
+Invoices
+
+Receipts
+
+Notifications
+
+Support Tickets
+
+Profile
+
+==================================================
+ADMIN DASHBOARD
+==================================================
+
+Dashboard Overview
+
+Shipments
+
+Customers
+
+Drivers
+
+Quotes
+
+Invoices
+
+Payments
+
+Reports
+
+Analytics
+
+Staff
+
+Contact Messages
+
+Blog
+
+Settings
+
+System Logs
+
+==================================================
+ROLE MANAGEMENT
+==================================================
+
+Super Admin
+
+Manager
+
+Operations
+
+Customer Support
+
+Tracking Agent
+
+Driver
+
+Customer
+
+Each role has granular permissions.
+
+==================================================
+DRIVER DASHBOARD
+==================================================
+
+Assigned Deliveries
+
+Google Navigation
+
+Accept Delivery
+
+Update Status
+
+Upload Photos
+
+Capture Signature
+
+Delivery Notes
+
+Delivery History
+
+==================================================
+SHIPMENT MANAGEMENT
+==================================================
+
+Create Shipment
+
+Edit Shipment
+
+Delete Shipment
+
+Generate Tracking Number
+
+Generate QR Code
+
+Generate Barcode
+
+Assign Driver
+
+Assign Vehicle
+
+Shipment Notes
+
+Shipment Documents
+
+Shipment Images
+
+==================================================
+TRACKING NUMBER
+==================================================
+
+Automatically generate unique tracking IDs.
+
+Example
+
+PL-20260724-000001
+
+Never duplicate.
+
+==================================================
+SEARCH SYSTEM
+==================================================
+
+Search by
+
+Tracking Number
+
+Shipment Status
+
+Customer
+
+Receiver
+
+Phone
+
+Destination
+
+Origin
+
+Date
+
+Driver
+
+==================================================
+NOTIFICATIONS
+==================================================
+
+Automatic emails for
+
+Shipment Created
+
+Picked Up
+
+In Transit
+
+Delayed
+
+Delivered
+
+Cancelled
+
+Automatic SMS support
+
+Automatic WhatsApp support
+
+==================================================
+EMAIL SYSTEM
+==================================================
+
+SMTP Integration
+
+HTML Templates
+
+Queue Emails
+
+Retry Failed Emails
+
+Email Logs
+
+==================================================
+QUOTE SYSTEM
+==================================================
+
+Customer requests quote.
+
+Admin can
+
+Approve
+
+Reject
+
+Modify
+
+Convert Quote to Shipment
+
+==================================================
+CONTACT SYSTEM
+==================================================
+
+Store enquiries.
+
+Assign support staff.
+
+Status:
+
+New
+
+Open
+
+Resolved
+
+Closed
+
+==================================================
+REPORTS
+==================================================
+
+Daily Shipments
+
+Weekly Shipments
+
+Monthly Shipments
+
+Revenue
+
+Customer Growth
+
+Driver Performance
+
+Delivery Success
+
+Failed Deliveries
+
+Popular Routes
+
+Export
+
+PDF
+
+Excel
+
+CSV
+
+==================================================
+ANALYTICS
+==================================================
+
+Charts
+
+Graphs
+
+KPIs
+
+Real-time Dashboard
+
+==================================================
+INVOICE SYSTEM
+==================================================
+
+Generate
+
+Invoices
+
+Receipts
+
+Waybills
+
+Shipping Labels
+
+Delivery Notes
+
+PDF Download
+
+==================================================
+PROOF OF DELIVERY
+==================================================
+
+Customer Signature
+
+Delivery Photo
+
+Driver Notes
+
+Timestamp
+
+GPS Coordinates
+
+==================================================
+GOOGLE MAPS
+==================================================
+
+Pickup
+
+Destination
+
+Distance
+
+ETA
+
+Route
+
+Live Vehicle Position (future ready)
+
+==================================================
+SECURITY
+==================================================
+
+Helmet
+
+Rate Limiting
+
+CORS
+
+CSRF Protection
+
+Input Validation
+
+SQL Injection Protection
+
+XSS Protection
+
+Password Hashing
+
+JWT
+
+Refresh Tokens
+
+Audit Logs
+
+Automatic Backups
+
+================================================
+```

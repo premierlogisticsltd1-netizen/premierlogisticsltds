@@ -40,7 +40,7 @@ export default function Track() {
         <div className="max-w-4xl mx-auto w-full flex items-center justify-between">
           <div className="font-bold text-xl tracking-tight flex items-center gap-2">
             <Truck className="text-primary h-6 w-6" />
-            SWIFT COURIER
+            PREMIER LOGISTICS
           </div>
           <a href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Staff Login

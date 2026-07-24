@@ -1,6 +1,6 @@
-# Swift Courier
+# Premier Logistics Management Platform
 
-A pnpm workspace containing the Swift Courier React/Vite web app and its Express 5 API. The API uses PostgreSQL and Drizzle ORM for shipment, tracking, and authentication data.
+A pnpm workspace containing the Premier Logistics React/Vite web app and its Express 5 API. The API uses PostgreSQL and Drizzle ORM for shipment, tracking, and authentication data.
 
 ## Run & Operate
 

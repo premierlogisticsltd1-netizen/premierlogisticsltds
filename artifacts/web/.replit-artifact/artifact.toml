@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Courier App"
+title = "Premier Logistics Management Platform"
 version = "1.0.0"
 id = "artifacts/web"
 router = "path"

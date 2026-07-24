@@ -20,7 +20,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }
 
   const navItems = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/shipments", label: "Shipments", icon: Package2 },
     { href: "/track", label: "Public Tracking", icon: Search },
   ];
@@ -31,7 +31,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-sidebar-border gap-3 font-bold text-xl tracking-tight">
           <Truck className="text-primary h-6 w-6" />
-          SWIFT COURIER
+          PREMIER LOGISTICS
         </div>
         
         <nav className="flex-1 py-6 px-4 space-y-2">
@@ -85,7 +85,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <header className="h-16 border-b border-border flex items-center px-6 md:hidden">
           <div className="font-bold text-xl tracking-tight flex items-center gap-2">
             <Truck className="text-primary h-6 w-6" />
-            SWIFT COURIER
+            PREMIER LOGISTICS
           </div>
         </header>
         <div className="flex-1 overflow-auto">

@@ -9,7 +9,7 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setLocation("/");
+      setLocation("/dashboard");
     }
   }, [isAuthenticated, setLocation]);
 
@@ -23,7 +23,7 @@ export default function Login() {
             <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
               <Truck className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="font-bold text-2xl tracking-tight">SWIFT COURIER</span>
+            <span className="font-bold text-2xl tracking-tight">PREMIER LOGISTICS</span>
           </div>
 
           <h1 className="text-4xl font-bold tracking-tight mb-3">Log in to your operations hub</h1>
@@ -45,7 +45,7 @@ export default function Login() {
         <div className="absolute inset-0 bg-gradient-to-t from-sidebar to-transparent"></div>
         <div className="absolute bottom-12 left-12 right-12">
           <blockquote className="text-xl text-sidebar-foreground font-medium mb-4">
-            "Precision beats speed, but Swift Courier delivers both. A masterclass in logistics operations."
+            "Precision beats speed, and Premier Logistics delivers both."
           </blockquote>
           <p className="text-sidebar-foreground/50 text-sm font-mono uppercase tracking-wider">
             SYSTEM // READY
