@@ -7,12 +7,7 @@ interface AuthState {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: () => void;
   logout: () => void;
-}
-
-function getBasePath() {
-  return import.meta.env.BASE_URL.replace(/\/+$/, '') || '/';
 }
 
 export function useAuth(): AuthState {
@@ -45,21 +40,17 @@ export function useAuth(): AuthState {
     };
   }, []);
 
-  const login = useCallback(() => {
-    const base = getBasePath();
-    window.location.href = `/api/login?returnTo=${encodeURIComponent(base)}`;
-  }, []);
-
   const logout = useCallback(() => {
-    const base = getBasePath();
-    window.location.href = `/api/logout?returnTo=${encodeURIComponent(base)}`;
+    fetch('/api/logout', { method: 'POST', credentials: 'include' })
+      .finally(() => {
+        window.location.href = '/login';
+      });
   }, []);
 
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
-    login,
     logout,
   };
 }

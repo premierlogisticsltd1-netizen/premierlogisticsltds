@@ -1,17 +1,11 @@
 import type { AuthUser } from '@workspace/api-zod';
 import { type NextFunction, type Request, type Response } from 'express';
-import * as oidc from 'openid-client';
 
 import {
   clearSession,
-  getOidcConfig,
   getSession,
   getSessionId,
-  updateSession,
-  type SessionData,
 } from '../lib/auth';
-import { db, usersTable } from '@workspace/db';
-import { eq } from 'drizzle-orm';
 
 declare global {
   namespace Express {
@@ -19,37 +13,12 @@ declare global {
 
     interface Request {
       isAuthenticated(): this is AuthedRequest;
-
       user?: User | undefined;
     }
 
     export interface AuthedRequest {
       user: User;
     }
-  }
-}
-
-async function refreshIfExpired(
-  sid: string,
-  session: SessionData,
-): Promise<SessionData | null> {
-  const now = Math.floor(Date.now() / 1000);
-  if (!session.expires_at || now <= session.expires_at) return session;
-
-  if (!session.refresh_token) return null;
-
-  try {
-    const config = await getOidcConfig();
-    const tokens = await oidc.refreshTokenGrant(config, session.refresh_token);
-    session.access_token = tokens.access_token;
-    session.refresh_token = tokens.refresh_token ?? session.refresh_token;
-    session.expires_at = tokens.expiresIn()
-      ? now + tokens.expiresIn()!
-      : session.expires_at;
-    await updateSession(sid, session);
-    return session;
-  } catch {
-    return null;
   }
 }
 
@@ -75,14 +44,7 @@ export async function authMiddleware(
     return;
   }
 
-  const refreshed = await refreshIfExpired(sid, session);
-  if (!refreshed) {
-    await clearSession(res, sid);
-    next();
-    return;
-  }
-
-  req.user = refreshed.user;
+  req.user = session.user;
   next();
 }
 
@@ -95,9 +57,11 @@ export function requireAuth(
     res.status(401).json({ error: 'Authentication required' });
     return;
   }
-
   next();
 }
+
+import { db, usersTable } from '@workspace/db';
+import { eq } from 'drizzle-orm';
 
 export function requireRole(...roles: string[]) {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -105,8 +69,11 @@ export function requireRole(...roles: string[]) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
-    const [user] = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user.id));
-    // Owner (Super Admin) bypasses all role restrictions
+    const [user] = await db
+      .select({ role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.id, req.user.id));
+    // Owner bypasses all role restrictions
     if (!user || (user.role !== 'owner' && !roles.includes(user.role))) {
       res.status(403).json({ error: 'Insufficient permissions' });
       return;
