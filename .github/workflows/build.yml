@@ -1,0 +1,41 @@
+name: Build & Typecheck
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck libs
+        run: pnpm run typecheck:libs
+
+      - name: Build web
+        run: pnpm --filter @workspace/web... run build
+        env:
+          PORT: "5173"
+          BASE_PATH: "/"
+
+      - name: Build API
+        run: pnpm --filter @workspace/api-server run build
+        env:
+          NODE_ENV: production
