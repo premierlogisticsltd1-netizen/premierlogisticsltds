@@ -54,7 +54,35 @@ All public and staff forms were checked for `id`, `name`, and `htmlFor` attribut
 | `quotes.tsx` | 4 (create form + inline edit status/cost) | ✅ Fixed |
 | `home.tsx` | 8 (quote form) | ✅ Already correct |
 | `portal.tsx` | registration form | ✅ Already correct |
+| `contact.tsx` | 5 (name, email, phone, subject, message) | ✅ Already correct |
+| `new-shipment.tsx` | 7 (sender/recipient fields, weight, delivery, description) | ✅ Already correct |
 | `invoices.tsx`, `drivers.tsx`, `shipment-detail.tsx`, `shipments.tsx`, `customers.tsx`, `admin.tsx` | previously fixed | ✅ Correct |
+
+### Additional global accessibility fix
+
+- `artifacts/web/index.html`: changed `<meta name="viewport" content="... maximum-scale=1">` to `maximum-scale=5`. This removes the Lighthouse/axe violation that disabled text scaling and zooming for users with low vision, raising scores on every route.
+
+### Lighthouse + axe re-run (after fixes)
+
+Scores are for the **Accessibility** category only. Checks ran against the Vite dev server on `localhost:22333` using Chromium via `puppeteer` + `lighthouse` + `axe-core` (tags: `wcag2a`, `wcag2aa`, `wcag21aa`, `best-practice`).
+
+| Route | Lighthouse | Remaining Lighthouse violations | axe violations |
+|-------|-----------|--------------------------------|----------------|
+| `/` | 96 | color-contrast | color-contrast (20), region (1) |
+| `/track` | 96 | color-contrast | color-contrast (1), landmark-one-main (1), region (5) |
+| `/login` | 95 | color-contrast | color-contrast (1), landmark-one-main (1), region (3) |
+| `/contact` | 96 | color-contrast | color-contrast (6), landmark-one-main (1), region (22) |
+| `/about` | 95 | color-contrast | color-contrast (9), landmark-one-main (1), region (13) |
+| `/services` | 94 | color-contrast, heading-order | color-contrast (4), heading-order (1), landmark-one-main (1), region (26) |
+| `/pricing` | 94 | color-contrast, heading-order | color-contrast (11), heading-order (1), landmark-one-main (1), region (19) |
+| `/faqs` | 96 | color-contrast | color-contrast (2), landmark-one-main (1), region (7) |
+| `/terms` | 100 | — | color-contrast (1), landmark-one-main (1), region (1) |
+| `/privacy` | 100 | — | color-contrast (1), landmark-one-main (1), region (1) |
+
+No form-label or autofill violations remain. The remaining issues are:
+1. **color-contrast** — low-contrast text in the marketing design (notably the orange accent `#ff6208` on light backgrounds and muted text). A design pass is needed to verify/fix brand colors against WCAG AA.
+2. **landmark-one-main / region** — public pages render inside a single `div#root` without a `<main>` landmark or `<header>/<footer>/<nav>` regions. A layout refactor to add semantic landmarks would resolve these.
+3. **heading-order** — `/services` and `/pricing` have a heading-level skip; the page structure should be reviewed.
 
 ---
 
