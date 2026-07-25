@@ -278,6 +278,12 @@ router.patch("/portal/profile", requireAuth, async (req, res): Promise<void> => 
   res.json(updated);
 });
 
+// Check if an owner exists (public to any authenticated user)
+router.get("/admin/setup", requireAuth, async (_req, res): Promise<void> => {
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(eq(usersTable.role, "owner"));
+  res.json({ ownerExists: Number(count) > 0 });
+});
+
 // Owner setup — only works when zero owners exist.
 // Any authenticated user can call this; they become the first owner (Super Admin).
 router.post("/admin/setup", requireAuth, async (req, res): Promise<void> => {

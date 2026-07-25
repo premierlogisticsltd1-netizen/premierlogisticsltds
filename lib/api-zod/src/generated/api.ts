@@ -968,6 +968,22 @@ export const GetReportsSummaryResponse = zod.object({
 
 
 /**
+ * @summary Check whether an owner account exists
+ */
+export const GetOwnerSetupStatusResponse = zod.object({
+  "ownerExists": zod.boolean()
+})
+
+
+/**
+ * @summary Claim the owner role (only works when no owner exists)
+ */
+export const ClaimOwnerRoleResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
  * @summary List all users (admin only)
  */
 export const ListAdminUsersResponseItem = zod.object({

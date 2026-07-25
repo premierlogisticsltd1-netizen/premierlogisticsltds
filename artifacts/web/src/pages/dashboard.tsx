@@ -1,11 +1,29 @@
-import { useGetDashboardStats, useListShipments } from "@workspace/api-client-react";
+import { useGetDashboardStats, useListShipments, useGetOwnerSetupStatus, useClaimOwnerRole } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Package, Truck, CheckCircle2, Clock, AlertCircle, TrendingUp, Loader2 } from "lucide-react";
+import { Package, Truck, CheckCircle2, Clock, AlertCircle, TrendingUp, Loader2, Crown } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
   const { data: recentShipments, isLoading: shipmentsLoading } = useListShipments({ status: "pending" });
+  const { data: setupStatus } = useGetOwnerSetupStatus();
+  const { mutateAsync: claimOwner, isPending: claiming } = useClaimOwnerRole();
+  const [claimError, setClaimError] = useState("");
+  const [claimDone, setClaimDone] = useState(false);
+  const qc = useQueryClient();
+
+  async function handleClaim() {
+    setClaimError("");
+    try {
+      await claimOwner({});
+      setClaimDone(true);
+      qc.invalidateQueries();
+    } catch {
+      setClaimError("Could not claim owner role — an owner may already exist. Refresh and try again.");
+    }
+  }
 
   const formatStatus = (status: string) => {
     return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -44,6 +62,36 @@ export default function Dashboard() {
           New Shipment
         </Link>
       </div>
+
+      {/* Owner Setup Banner */}
+      {setupStatus && !setupStatus.ownerExists && !claimDone && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <Crown className="h-5 w-5 text-purple-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-semibold text-purple-900">No owner account yet</p>
+              <p className="text-sm text-purple-700 mt-0.5">
+                Claim the Owner (Super Admin) role to unlock full control over users, roles, and system settings.
+              </p>
+              {claimError && <p className="text-sm text-red-600 mt-1">{claimError}</p>}
+            </div>
+          </div>
+          <button
+            onClick={handleClaim}
+            disabled={claiming}
+            className="shrink-0 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white font-semibold text-sm px-5 py-2 rounded-md flex items-center gap-2 transition-colors"
+          >
+            {claiming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+            {claiming ? "Claiming…" : "Claim Owner Role"}
+          </button>
+        </div>
+      )}
+      {claimDone && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-5 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-purple-600 shrink-0" />
+          <p className="font-semibold text-purple-900">You are now the Owner (Super Admin). Refresh to see your updated role.</p>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

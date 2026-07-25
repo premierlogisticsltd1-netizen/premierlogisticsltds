@@ -614,6 +614,14 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface OwnerSetupStatus {
+  ownerExists: boolean;
+}
+
+export interface OwnerSetupResult {
+  message: string;
+}
+
 export type UserRoleUpdateRole = typeof UserRoleUpdateRole[keyof typeof UserRoleUpdateRole];
 
 

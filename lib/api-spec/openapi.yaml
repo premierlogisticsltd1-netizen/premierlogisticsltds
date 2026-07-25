@@ -854,6 +854,36 @@ paths:
               schema:
                 $ref: "#/components/schemas/ReportsSummary"
 
+  /admin/setup:
+    get:
+      operationId: getOwnerSetupStatus
+      tags: [admin]
+      summary: Check whether an owner account exists
+      responses:
+        "200":
+          description: Setup status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnerSetupStatus"
+    post:
+      operationId: claimOwnerRole
+      tags: [admin]
+      summary: Claim the owner role (only works when no owner exists)
+      responses:
+        "200":
+          description: Caller is now the owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnerSetupResult"
+        "409":
+          description: Owner already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /admin/users:
     get:
       operationId: listAdminUsers
@@ -1649,6 +1679,20 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    OwnerSetupStatus:
+      type: object
+      required: [ownerExists]
+      properties:
+        ownerExists:
+          type: boolean
+
+    OwnerSetupResult:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
 
     UserRoleUpdate:
       type: object

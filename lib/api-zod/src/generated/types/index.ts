@@ -41,6 +41,8 @@ export * from './logoutSuccess';
 export * from './mobileTokenExchangeRequest';
 export * from './mobileTokenExchangeSuccess';
 export * from './notification';
+export * from './ownerSetupResult';
+export * from './ownerSetupStatus';
 export * from './portalOverview';
 export * from './proofOfDelivery';
 export * from './proofOfDeliveryInput';

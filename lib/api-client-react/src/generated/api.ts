@@ -45,6 +45,8 @@ import type {
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess,
   Notification,
+  OwnerSetupResult,
+  OwnerSetupStatus,
   PortalOverview,
   ProofOfDelivery,
   ProofOfDeliveryInput,
@@ -2861,6 +2863,154 @@ export function useGetReportsSummary<TData = Awaited<ReturnType<typeof getReport
 
 
 
+
+export const getGetOwnerSetupStatusUrl = () => {
+
+
+
+
+  return `/api/admin/setup`
+}
+
+/**
+ * @summary Check whether an owner account exists
+ */
+export const getOwnerSetupStatus = async ( options?: RequestInit): Promise<OwnerSetupStatus> => {
+
+  return customFetch<OwnerSetupStatus>(getGetOwnerSetupStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOwnerSetupStatusQueryKey = () => {
+    return [
+    `/api/admin/setup`
+    ] as const;
+    }
+
+
+export const getGetOwnerSetupStatusQueryOptions = <TData = Awaited<ReturnType<typeof getOwnerSetupStatus>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnerSetupStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOwnerSetupStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOwnerSetupStatus>>> = ({ signal }) => getOwnerSetupStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOwnerSetupStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetOwnerSetupStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getOwnerSetupStatus>>>
+export type GetOwnerSetupStatusQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Check whether an owner account exists
+ */
+
+export function useGetOwnerSetupStatus<TData = Awaited<ReturnType<typeof getOwnerSetupStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnerSetupStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetOwnerSetupStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getClaimOwnerRoleUrl = () => {
+
+
+
+
+  return `/api/admin/setup`
+}
+
+/**
+ * @summary Claim the owner role (only works when no owner exists)
+ */
+export const claimOwnerRole = async ( options?: RequestInit): Promise<OwnerSetupResult> => {
+
+  return customFetch<OwnerSetupResult>(getClaimOwnerRoleUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getClaimOwnerRoleMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimOwnerRole>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimOwnerRole>>, TError,void, TContext> => {
+
+const mutationKey = ['claimOwnerRole'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimOwnerRole>>, void> = () => {
+
+
+          return  claimOwnerRole(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimOwnerRoleMutationResult = NonNullable<Awaited<ReturnType<typeof claimOwnerRole>>>
+
+    export type ClaimOwnerRoleMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Claim the owner role (only works when no owner exists)
+ */
+export const useClaimOwnerRole = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimOwnerRole>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof claimOwnerRole>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getClaimOwnerRoleMutationOptions(options));
+    }
 
 export const getListAdminUsersUrl = () => {
 
