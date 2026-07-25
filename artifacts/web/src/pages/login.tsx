@@ -32,7 +32,7 @@ export default function Login() {
           </p>
 
           <button
-            onClick={() => login()}
+            onClick={() => { window.location.href = '/api/login?returnTo=/dashboard'; }}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-12 px-6 rounded-md transition-all shadow-sm flex items-center justify-center gap-2"
           >
             Log in to Dashboard
