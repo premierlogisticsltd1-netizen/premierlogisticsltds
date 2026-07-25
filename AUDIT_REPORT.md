@@ -16,6 +16,7 @@ The following fixes were applied directly to the correct repository as part of t
 | 2 | **Public marketing pages** — added About, Services, Contact, Pricing, FAQs, Privacy, Terms | `about.tsx`, `services.tsx`, `contact.tsx`, `pricing.tsx`, `faqs.tsx`, `privacy.tsx`, `terms.tsx` | ✅ |
 | 3 | **Wired new public routes** — updated App.tsx and home navigation/footer links | `App.tsx`, `home.tsx` | ✅ |
 | 4 | **Open Graph image** — added `og:image` and `twitter:image` for social sharing | `index.html`, `public/og-image.svg` | ✅ |
+| 5 | **Static prerender step** — generates route-specific HTML shells for public pages with unique titles, descriptions, OG/URL tags, and canonical links | `scripts/src/prerender.ts`, `artifacts/web/package.json` | ✅ |
 
 Existing protections verified in the correct repo (already present):
 - Helmet security headers
@@ -31,14 +32,15 @@ Existing protections verified in the correct repo (already present):
 
 ## Part 1 — Architecture Decision
 
-The codebase is a React 19 + Vite 7 + wouter SPA. There is no Next.js or SSR. The `<head>` now contains:
-- `<meta name="description">`
-- `<meta property="og:title">`, `og:description`, `og:type`, `og:image` (added), `og:image:width`, `og:image:height`
-- `<meta name="twitter:card">`, `twitter:image` (added)
-- `<meta name="robots" content="index, follow">`
-- `<noscript>` branded fallback
+The codebase is a React 19 + Vite 7 + wouter SPA. There is no Next.js, no `pages/`/`app/` directory, and no server-side rendering. This is **an intentional engineering decision** for this audit/fix round, not a deployment mistake. A full Next.js migration is out of scope here and is recorded as a separate future project.
 
-Still missing: prerendering/SSG for the Home and Track pages, and canonical `<link rel="canonical">` tags. A full Next.js migration is a separate task; prerendering with a build-time step would close the social-scraper gap.
+To address the social-scraper/SEO gap without migrating frameworks, a **build-time static prerender step** has been added:
+- After `vite build`, `scripts/src/prerender.ts` generates an `index.html` shell for each public route (`/`, `/about`, `/services`, `/contact`, `/pricing`, `/faqs`, `/privacy`, `/terms`, `/track`, `/login`).
+- Each shell contains route-specific `<title>`, `<meta name="description">`, `og:title`, `og:description`, `og:url`, `twitter:title`, `twitter:description`, and a `<link rel="canonical">` tag.
+- The JS bundle still hydrates the SPA on load, so the app remains fully client-rendered at runtime, but crawlers and social scrapers now receive meaningful, route-specific HTML in the `<head>`.
+- A branded `<noscript>` fallback is included for browsers with JavaScript disabled.
+
+What is still not solved by this step: the actual page content (text, images, structured data) lives only in the JS bundle, so search engines that do not execute JavaScript will not see body content. A full SSR/Next.js migration would be needed for that.
 
 ---
 
