@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db, customersTable, driversTable, invoicesTable, notificationsTable, proofOfDeliveryTable, quotesTable, shipmentsTable, usersTable, contactMessagesTable, auditLogsTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../middlewares/authMiddleware";
+import bcrypt from "bcryptjs";
 
 async function logAudit(userId: string | undefined, action: string, resource: string, resourceId?: string, details?: string, ipAddress?: string) {
   try {
@@ -295,6 +296,47 @@ router.post("/admin/setup", requireAuth, async (req, res): Promise<void> => {
   const [user] = await db.update(usersTable).set({ role: "owner", updatedAt: new Date() }).where(eq(usersTable.id, req.user!.id)).returning();
   await logAudit(req.user!.id, "OWNER_SETUP", "user", req.user!.id, "First owner (Super Admin) promoted via setup endpoint", req.ip);
   res.json({ message: "You are now the system owner (Super Admin).", user });
+});
+
+// Admin: create a new staff account
+router.post("/admin/users", requireRole("admin", "manager", "owner"), async (req, res): Promise<void> => {
+  const email = bodyString(req.body?.email).toLowerCase().trim();
+  const password = bodyString(req.body?.password);
+  const firstName = bodyString(req.body?.firstName) || null;
+  const lastName = bodyString(req.body?.lastName) || null;
+  const role = bodyString(req.body?.role, "staff");
+
+  if (!email || !password) { res.status(400).json({ error: "Email and password are required" }); return; }
+  if (password.length < 6) { res.status(400).json({ error: "Password must be at least 6 characters" }); return; }
+
+  const validRoles = ["owner", "admin", "manager", "operations", "support", "tracking_agent", "staff", "driver", "customer"];
+  if (!validRoles.includes(role)) { res.status(400).json({ error: "Invalid role" }); return; }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  try {
+    const [user] = await db.insert(usersTable).values({ email, firstName, lastName, passwordHash, role }).returning({
+      id: usersTable.id, email: usersTable.email, firstName: usersTable.firstName,
+      lastName: usersTable.lastName, role: usersTable.role, createdAt: usersTable.createdAt,
+    });
+    await logAudit(req.user!.id, "USER_CREATED", "user", user.id, `Account created for ${email} with role ${role}`, req.ip);
+    res.status(201).json(user);
+  } catch (err: unknown) {
+    if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505") {
+      res.status(409).json({ error: "An account with that email already exists" }); return;
+    }
+    throw err;
+  }
+});
+
+// Admin: delete a user account (owner only)
+router.delete("/admin/users/:id", requireRole("owner"), async (req, res): Promise<void> => {
+  const userId = String(req.params.id);
+  if (userId === req.user!.id) { res.status(400).json({ error: "You cannot delete your own account" }); return; }
+  const [deleted] = await db.delete(usersTable).where(eq(usersTable.id, userId)).returning({ id: usersTable.id, email: usersTable.email });
+  if (!deleted) { res.status(404).json({ error: "User not found" }); return; }
+  await logAudit(req.user!.id, "USER_DELETED", "user", userId, `Account ${deleted.email} deleted`, req.ip);
+  res.json({ success: true });
 });
 
 // Audit log viewer — admin/owner only
