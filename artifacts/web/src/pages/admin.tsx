@@ -99,7 +99,8 @@ export default function Admin() {
                   <td className="px-6 py-4">
                     {editId === u.id ? (
                       <div className="flex gap-2 items-center">
-                        <select value={editRole} onChange={e => setEditRole(e.target.value)}
+                        <label htmlFor={`admin-role-${u.id}`} className="sr-only">Assign role to {u.firstName}</label>
+                        <select id={`admin-role-${u.id}`} name="userRole" value={editRole} onChange={e => setEditRole(e.target.value)}
                           className="border border-input rounded px-2 py-1 text-xs bg-background capitalize">
                           {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>

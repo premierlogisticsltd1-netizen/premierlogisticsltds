@@ -63,7 +63,10 @@ export default function Shipments() {
         <div className="p-4 border-b border-border flex flex-col md:flex-row gap-4 justify-between">
           <div className="relative max-w-md w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <label htmlFor="shipment-search" className="sr-only">Search shipments</label>
             <input
+              id="shipment-search"
+              name="search"
               type="text"
               placeholder="Search by tracking number, name, address..."
               value={search}

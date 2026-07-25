@@ -67,8 +67,8 @@ export default function Customers() {
               { key: "address", label: "Address" },
             ].map(({ key, label, required }) => (
               <div key={key}>
-                <label className="block text-sm font-medium mb-1">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
-                <input type={key === "email" ? "email" : "text"} required={required} placeholder={label}
+                <label htmlFor={`cust-${key}`} className="block text-sm font-medium mb-1">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
+                <input id={`cust-${key}`} name={key} type={key === "email" ? "email" : "text"} required={required} placeholder={label}
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50" />
@@ -122,7 +122,8 @@ export default function Customers() {
                   <td className="px-6 py-4">
                     {editId === c.id ? (
                       <div className="flex gap-2 items-center">
-                        <select value={editStatus} onChange={e => setEditStatus(e.target.value)}
+                        <label htmlFor={`cust-edit-status-${c.id}`} className="sr-only">Customer status</label>
+                        <select id={`cust-edit-status-${c.id}`} name="customerStatus" value={editStatus} onChange={e => setEditStatus(e.target.value)}
                           className="border border-input rounded px-2 py-1 text-xs bg-background">
                           <option value="active">Active</option>
                           <option value="inactive">Inactive</option>
