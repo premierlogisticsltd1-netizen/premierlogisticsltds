@@ -10,6 +10,7 @@ export type UserRoleUpdateRole = typeof UserRoleUpdateRole[keyof typeof UserRole
 
 
 export const UserRoleUpdateRole = {
+  owner: 'owner',
   admin: 'admin',
   manager: 'manager',
   operations: 'operations',

@@ -106,7 +106,8 @@ export function requireRole(...roles: string[]) {
       return;
     }
     const [user] = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user.id));
-    if (!user || !roles.includes(user.role)) {
+    // Owner (Super Admin) bypasses all role restrictions
+    if (!user || (user.role !== 'owner' && !roles.includes(user.role))) {
       res.status(403).json({ error: 'Insufficient permissions' });
       return;
     }

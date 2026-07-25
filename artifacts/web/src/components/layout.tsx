@@ -35,8 +35,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) return <>{children}</>;
 
   const roleStr = role as string | undefined;
-  const isStaff = ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(roleStr ?? "");
-  const isAdmin = roleStr === "admin" || roleStr === "manager";
+  const isOwner = roleStr === "owner";
+  const isStaff = isOwner || ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(roleStr ?? "");
+  const isAdmin = isOwner || roleStr === "admin" || roleStr === "manager";
   const isCustomer = roleStr === "customer";
   const isDriver = roleStr === "driver";
 
@@ -83,6 +84,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   ].filter(g => g.items.length > 0);
 
   const roleColors: Record<string, string> = {
+    owner: "bg-purple-100 text-purple-700",
     admin: "bg-red-100 text-red-700",
     manager: "bg-rose-100 text-rose-700",
     operations: "bg-blue-100 text-blue-700",

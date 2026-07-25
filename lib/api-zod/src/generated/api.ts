@@ -975,7 +975,7 @@ export const ListAdminUsersResponseItem = zod.object({
   "email": zod.string().nullable(),
   "firstName": zod.string().nullish(),
   "lastName": zod.string().nullish(),
-  "role": zod.enum(['admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer']),
+  "role": zod.enum(['owner', 'admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer']),
   "createdAt": zod.coerce.date()
 })
 export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
@@ -989,7 +989,7 @@ export const UpdateUserRoleParams = zod.object({
 })
 
 export const UpdateUserRoleBody = zod.object({
-  "role": zod.enum(['admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer'])
+  "role": zod.enum(['owner', 'admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer'])
 })
 
 export const UpdateUserRoleResponse = zod.object({
@@ -997,7 +997,7 @@ export const UpdateUserRoleResponse = zod.object({
   "email": zod.string().nullable(),
   "firstName": zod.string().nullish(),
   "lastName": zod.string().nullish(),
-  "role": zod.enum(['admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer']),
+  "role": zod.enum(['owner', 'admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer']),
   "createdAt": zod.coerce.date()
 })
 

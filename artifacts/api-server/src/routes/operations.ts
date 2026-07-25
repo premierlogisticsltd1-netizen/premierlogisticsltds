@@ -10,8 +10,8 @@ async function logAudit(userId: string | undefined, action: string, resource: st
 }
 
 const router: IRouter = Router();
-// All 7 roles that have staff-level access
-const ALL_ROLES = ["admin", "manager", "operations", "support", "tracking_agent", "driver", "customer"] as const;
+// All roles (owner has super-admin bypass in requireRole middleware)
+const ALL_ROLES = ["owner", "admin", "manager", "operations", "support", "tracking_agent", "driver", "customer"] as const;
 const staff = requireRole("staff", "admin", "manager", "operations", "support", "tracking_agent");
 const admin = requireRole("admin", "manager");
 const driver = requireRole("driver", "staff", "admin", "manager", "operations");
@@ -278,21 +278,21 @@ router.patch("/portal/profile", requireAuth, async (req, res): Promise<void> => 
   res.json(updated);
 });
 
-// First-admin setup — only works when zero admins exist.
-// Any authenticated user can call this; they become the first admin.
+// Owner setup — only works when zero owners exist.
+// Any authenticated user can call this; they become the first owner (Super Admin).
 router.post("/admin/setup", requireAuth, async (req, res): Promise<void> => {
-  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(eq(usersTable.role, "admin"));
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(eq(usersTable.role, "owner"));
   if (Number(count) > 0) {
-    res.status(409).json({ error: "An admin already exists. Contact your system administrator." });
+    res.status(409).json({ error: "An owner already exists. Contact your system administrator." });
     return;
   }
-  const [user] = await db.update(usersTable).set({ role: "admin", updatedAt: new Date() }).where(eq(usersTable.id, req.user!.id)).returning();
-  await logAudit(req.user!.id, "FIRST_ADMIN_SETUP", "user", req.user!.id, "First admin promoted via setup endpoint", req.ip);
-  res.json({ message: "You are now the system administrator.", user });
+  const [user] = await db.update(usersTable).set({ role: "owner", updatedAt: new Date() }).where(eq(usersTable.id, req.user!.id)).returning();
+  await logAudit(req.user!.id, "OWNER_SETUP", "user", req.user!.id, "First owner (Super Admin) promoted via setup endpoint", req.ip);
+  res.json({ message: "You are now the system owner (Super Admin).", user });
 });
 
-// Audit log viewer — admin only
-router.get("/admin/audit-logs", requireRole("admin", "manager"), async (req, res): Promise<void> => {
+// Audit log viewer — admin/owner only
+router.get("/admin/audit-logs", requireRole("admin", "manager", "owner"), async (req, res): Promise<void> => {
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
   const offset = (page - 1) * limit;
@@ -301,7 +301,7 @@ router.get("/admin/audit-logs", requireRole("admin", "manager"), async (req, res
 });
 
 // Admin: role management with audit logging
-router.patch("/admin/users/:id/role", requireRole("admin", "manager"), async (req, res): Promise<void> => {
+router.patch("/admin/users/:id/role", requireRole("admin", "manager", "owner"), async (req, res): Promise<void> => {
   const userId = String(req.params.id);
   const role = bodyString(req.body?.role);
   if (!role) { res.status(400).json({ error: "role is required" }); return; }

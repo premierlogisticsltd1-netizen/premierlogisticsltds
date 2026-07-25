@@ -10,6 +10,7 @@ export type AdminUserRole = typeof AdminUserRole[keyof typeof AdminUserRole];
 
 
 export const AdminUserRole = {
+  owner: 'owner',
   admin: 'admin',
   manager: 'manager',
   operations: 'operations',

@@ -3,10 +3,11 @@ import { useState } from "react";
 import { Shield, Loader2, AlertCircle, Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
-const ROLES = ["admin", "manager", "operations", "support", "tracking_agent", "driver", "customer"] as const;
+const ROLES = ["owner", "admin", "manager", "operations", "support", "tracking_agent", "driver", "customer"] as const;
 
 function roleColor(role: string) {
   return {
+    owner: "bg-purple-100 text-purple-800 border-purple-200",
     admin: "bg-red-100 text-red-800 border-red-200",
     manager: "bg-rose-100 text-rose-800 border-rose-200",
     operations: "bg-blue-100 text-blue-800 border-blue-200",
@@ -44,6 +45,7 @@ export default function Admin() {
   }, {} as Record<string, number>);
 
   const roleLabel: Record<string, string> = {
+    owner: "Owner",
     admin: "Admin",
     manager: "Manager",
     operations: "Operations",
