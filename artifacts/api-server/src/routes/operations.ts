@@ -1,12 +1,14 @@
 import { Router, type IRouter } from "express";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { db, customersTable, driversTable, invoicesTable, notificationsTable, proofOfDeliveryTable, quotesTable, shipmentsTable, usersTable } from "@workspace/db";
+import { db, customersTable, driversTable, invoicesTable, notificationsTable, proofOfDeliveryTable, quotesTable, shipmentsTable, usersTable, contactMessagesTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../middlewares/authMiddleware";
 
 const router: IRouter = Router();
-const staff = requireRole("staff", "admin");
-const admin = requireRole("admin");
-const driver = requireRole("driver", "staff", "admin");
+// All 7 roles that have staff-level access
+const ALL_ROLES = ["admin", "manager", "operations", "support", "tracking_agent", "driver", "customer"] as const;
+const staff = requireRole("staff", "admin", "manager", "operations", "support", "tracking_agent");
+const admin = requireRole("admin", "manager");
+const driver = requireRole("driver", "staff", "admin", "manager", "operations");
 
 const id = (value: unknown) => Number.parseInt(String(value), 10);
 const number = (prefix: string) => `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`;
@@ -190,10 +192,84 @@ router.get("/admin/users", admin, async (_req, res): Promise<void> => {
 
 router.patch("/admin/users/:id/role", admin, async (req, res): Promise<void> => {
   const role = bodyString(req.body?.role);
-  if (!["admin", "staff", "driver", "customer"].includes(role)) { res.status(400).json({ error: "Invalid role" }); return; }
+  const validRoles = ["admin", "manager", "operations", "support", "tracking_agent", "staff", "driver", "customer"];
+  if (!validRoles.includes(role)) { res.status(400).json({ error: "Invalid role" }); return; }
   const [user] = await db.update(usersTable).set({ role, updatedAt: new Date() }).where(eq(usersTable.id, String(req.params.id))).returning({ id: usersTable.id, email: usersTable.email, role: usersTable.role });
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
   res.json(user);
+});
+
+// Convert approved quote to a shipment
+router.post("/quotes/:id/convert", staff, async (req, res): Promise<void> => {
+  const quoteId = id(req.params.id);
+  const [quote] = await db.select().from(quotesTable).where(eq(quotesTable.id, quoteId));
+  if (!quote) { res.status(404).json({ error: "Quote not found" }); return; }
+  if (quote.status === "rejected") { res.status(400).json({ error: "Cannot convert a rejected quote" }); return; }
+
+  const prefix = `PL-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-`;
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(shipmentsTable);
+  const seq = (Number(count) + 1).toString().padStart(6, "0");
+  const trackingNumber = `${prefix}${seq}`;
+
+  const senderName = bodyString(req.body?.senderName) || (quote.contactName ?? "Unknown Sender");
+  const senderAddress = bodyString(req.body?.senderAddress) || quote.origin;
+
+  const [shipment] = await db.insert(shipmentsTable).values({
+    trackingNumber,
+    senderName,
+    senderAddress,
+    recipientName: bodyString(req.body?.recipientName) || "TBD",
+    recipientAddress: quote.destination,
+    weight: quote.weight ?? undefined,
+    description: quote.notes ?? undefined,
+  }).returning();
+
+  await db.update(quotesTable).set({ status: "approved", updatedAt: new Date() }).where(eq(quotesTable.id, quoteId));
+  res.status(201).json({ shipment, message: `Shipment ${trackingNumber} created from quote ${quote.quoteNumber}` });
+});
+
+// Public contact form submission
+router.post("/public/contact", async (req, res): Promise<void> => {
+  const name = bodyString(req.body?.name);
+  const email = bodyString(req.body?.email).toLowerCase();
+  const message = bodyString(req.body?.message);
+  if (!name || !email || !message) { res.status(400).json({ error: "Name, email, and message are required" }); return; }
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailIsValid) { res.status(400).json({ error: "A valid email is required" }); return; }
+  const [msg] = await db.insert(contactMessagesTable).values({
+    name, email,
+    phone: bodyString(req.body?.phone) || null,
+    subject: bodyString(req.body?.subject) || null,
+    message,
+  }).returning();
+  res.status(201).json(msg);
+});
+
+// Admin: list contact messages
+router.get("/admin/contact-messages", staff, async (_req, res): Promise<void> => {
+  res.json(await db.select().from(contactMessagesTable).orderBy(desc(contactMessagesTable.createdAt)));
+});
+
+// Admin: update contact message status
+router.patch("/admin/contact-messages/:id", staff, async (req, res): Promise<void> => {
+  const status = bodyString(req.body?.status, "new");
+  const [msg] = await db.update(contactMessagesTable).set({ status, assignedTo: bodyString(req.body?.assignedTo) || null, updatedAt: new Date() }).where(eq(contactMessagesTable.id, id(req.params.id))).returning();
+  if (!msg) { res.status(404).json({ error: "Message not found" }); return; }
+  res.json(msg);
+});
+
+// Portal: update profile
+router.patch("/portal/profile", requireAuth, async (req, res): Promise<void> => {
+  const [customer] = await db.select().from(customersTable).where(eq(customersTable.userId, req.user!.id));
+  if (!customer) { res.status(404).json({ error: "Customer profile not found" }); return; }
+  const [updated] = await db.update(customersTable).set({
+    name: bodyString(req.body?.name) || customer.name,
+    company: bodyString(req.body?.company) || null,
+    phone: bodyString(req.body?.phone) || null,
+    address: bodyString(req.body?.address) || null,
+    updatedAt: new Date(),
+  }).where(eq(customersTable.id, customer.id)).returning();
+  res.json(updated);
 });
 
 export default router;

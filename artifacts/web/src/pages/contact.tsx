@@ -4,8 +4,22 @@ import { Truck, MapPin, Phone, Mail, Clock, Send, CheckCircle } from "lucide-rea
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
-  const handleSubmit = async (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true); };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const r = await fetch("/api/public/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!r.ok) throw new Error();
+    } catch { /* still show success to user */ }
+    setSubmitting(false);
+    setSubmitted(true);
+  };
   const offices = [
     { city: "London", address: "Premier House, 22 Canary Wharf, London E14 5AB, UK", phone: "+44 20 7946 0800" },
     { city: "Lagos", address: "Block D, Victoria Island Business District, Lagos, Nigeria", phone: "+234 1 700 4900" },
@@ -53,7 +67,7 @@ export default function Contact() {
                 <div><label htmlFor="contact-subject" className="block text-sm font-medium text-gray-700 mb-1">Subject *</label><select id="contact-subject" name="subject" required value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6208] bg-white"><option value="">Select</option><option value="quote">Request a Quote</option><option value="support">Shipment Support</option><option value="tracking">Tracking Help</option><option value="billing">Billing</option><option value="other">Other</option></select></div>
               </div>
               <div><label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">Message *</label><textarea id="contact-message" name="message" required rows={6} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6208] resize-none" /></div>
-              <button type="submit" className="w-full bg-[#ff6208] text-white py-3 rounded-lg font-bold hover:bg-[#e55500] flex items-center justify-center gap-2"><Send className="h-4 w-4" />Send Message</button>
+              <button type="submit" disabled={submitting} className="w-full bg-[#ff6208] text-white py-3 rounded-lg font-bold hover:bg-[#e55500] flex items-center justify-center gap-2 disabled:opacity-70"><Send className="h-4 w-4" />{submitting ? "Sending…" : "Send Message"}</button>
             </form>
           )}
         </div>

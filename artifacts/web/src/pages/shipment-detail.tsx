@@ -7,6 +7,8 @@ import {
   useAddTrackingEvent,
   useDeleteShipment,
   useSubmitProofOfDelivery,
+  useAssignDriver,
+  useListDrivers,
   useGetMe,
   getGetShipmentQueryKey,
   getListShipmentEventsQueryKey,
@@ -15,7 +17,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   ArrowLeft, Package, MapPin, Clock, Scale, Calendar, Trash2,
-  CheckCircle2, Plus, Loader2, AlertCircle, FileText, Truck, ClipboardCheck
+  CheckCircle2, Plus, Loader2, AlertCircle, FileText, Truck, ClipboardCheck, UserCheck
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -40,12 +42,26 @@ export default function ShipmentDetail() {
   const { data: events, isLoading: isEventsLoading } = useListShipmentEvents(id, { query: { enabled: !!id, queryKey: getListShipmentEventsQueryKey(id) } });
 
   const { data: me } = useGetMe();
-  const isStaff = me?.role === "staff" || me?.role === "admin";
+  const roleStr = me?.role as string | undefined;
+  const isStaff = ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(roleStr ?? "");
 
   const updateShipment = useUpdateShipment();
   const addEvent = useAddTrackingEvent();
   const deleteShipment = useDeleteShipment();
   const submitPod = useSubmitProofOfDelivery();
+  const assignDriver = useAssignDriver();
+  const { data: drivers = [] } = useListDrivers({ query: { enabled: isStaff, queryKey: ["listDrivers"] } });
+
+  const [selectedDriverId, setSelectedDriverId] = useState<string>("");
+  const [assignSuccess, setAssignSuccess] = useState("");
+
+  const handleAssignDriver = async () => {
+    const driverId = selectedDriverId ? Number(selectedDriverId) : (null as unknown as number);
+    await assignDriver.mutateAsync({ id, data: { driverId } });
+    setAssignSuccess(driverId ? `Driver assigned successfully` : "Driver unassigned");
+    setTimeout(() => setAssignSuccess(""), 3000);
+    queryClient.invalidateQueries({ queryKey: getGetShipmentQueryKey(id) });
+  };
 
   const [podForm, setPodForm] = useState({ recipientName: "", notes: "" });
   const [podSubmitted, setPodSubmitted] = useState(false);
@@ -266,6 +282,54 @@ export default function ShipmentDetail() {
             </form>
           </div>
         </div>
+
+        {/* Assign Driver */}
+        {isStaff && (
+          <div className="bg-card border border-card-border rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-primary" />
+              Assign Driver
+            </h3>
+            {(shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId && (
+              <div className="mb-3 text-sm text-muted-foreground flex items-center gap-2">
+                <Truck className="h-4 w-4 text-primary" />
+                Currently: <span className="font-medium text-foreground">
+                  {(drivers as Array<{id: number; name: string}>).find(d => d.id === (shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId)?.name ?? `Driver #${(shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId}`}
+                </span>
+              </div>
+            )}
+            {assignSuccess && (
+              <div className="mb-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />{assignSuccess}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <label htmlFor="assign-driver-select" className="sr-only">Select Driver</label>
+              <select
+                id="assign-driver-select"
+                value={selectedDriverId}
+                onChange={e => setSelectedDriverId(e.target.value)}
+                className="flex-1 px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="">— Unassigned —</option>
+                {(drivers as Array<{id: number; name: string; status: string}>)
+                  .filter(d => d.status !== "inactive")
+                  .map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))
+                }
+              </select>
+              <button
+                onClick={handleAssignDriver}
+                disabled={assignDriver.isPending}
+                className="px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5 disabled:opacity-60"
+              >
+                {assignDriver.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+                {(shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId ? "Reassign" : "Assign"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Proof of Delivery */}
         {isStaff && shipment.status !== "delivered" && (

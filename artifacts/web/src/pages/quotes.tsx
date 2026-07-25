@@ -1,7 +1,8 @@
 import { useListQuotes, useCreateQuote, useUpdateQuote, useGetMe } from "@workspace/api-client-react";
 import { useState } from "react";
-import { FileText, Plus, X, Loader2, AlertCircle, ChevronDown } from "lucide-react";
+import { FileText, Plus, X, Loader2, AlertCircle, ChevronDown, PackagePlus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 function formatStatus(s: string) {
   return s.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
@@ -12,13 +13,15 @@ function statusColor(s: string) {
 
 export default function Quotes() {
   const qc = useQueryClient();
+  const [, setLocation] = useLocation();
   const { data: me } = useGetMe();
   const { data: quotes = [], isLoading } = useListQuotes();
   const { mutateAsync: createQuote, isPending: creating } = useCreateQuote();
   const { mutateAsync: updateQuote, isPending: updating } = useUpdateQuote();
 
-  const isStaff = me?.role === "staff" || me?.role === "admin";
+  const isStaff = ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(me?.role ?? "");
   const [showForm, setShowForm] = useState(false);
+  const [convertingId, setConvertingId] = useState<number | null>(null);
   const [form, setForm] = useState({ origin: "", destination: "", serviceType: "standard", weight: "", notes: "" });
   const [editId, setEditId] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState("");
@@ -43,6 +46,27 @@ export default function Quotes() {
       setEditId(null);
       qc.invalidateQueries();
     } catch { setError("Failed to update quote."); }
+  }
+
+  async function handleConvert(id: number) {
+    setConvertingId(id);
+    setError("");
+    try {
+      const r = await fetch(`/api/quotes/${id}/convert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({}),
+      });
+      if (!r.ok) { const d = await r.json(); throw new Error(d.error ?? "Failed"); }
+      const { shipment } = await r.json();
+      qc.invalidateQueries();
+      setLocation(`/shipments/${shipment.id}`);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to convert quote to shipment.");
+    } finally {
+      setConvertingId(null);
+    }
   }
 
   return (
@@ -131,6 +155,7 @@ export default function Quotes() {
                 <th className="px-6 py-4 font-medium">Est. Cost</th>
                 <th className="px-6 py-4 font-medium">Status</th>
                 <th className="px-6 py-4 font-medium">Date</th>
+                {isStaff && <th className="px-6 py-4 font-medium">Convert</th>}
                 {isStaff && <th className="px-6 py-4 font-medium">Actions</th>}
               </tr>
             </thead>
@@ -159,6 +184,20 @@ export default function Quotes() {
                   <td className="px-6 py-4 text-muted-foreground">{new Date(q.createdAt).toLocaleDateString()}</td>
                   {isStaff && (
                     <td className="px-6 py-4">
+                      {q.status !== "rejected" ? (
+                        <button
+                          onClick={() => handleConvert(q.id)}
+                          disabled={convertingId === q.id}
+                          className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded px-2.5 py-1.5 font-medium disabled:opacity-60 transition-colors"
+                        >
+                          {convertingId === q.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <PackagePlus className="h-3 w-3" />}
+                          {convertingId === q.id ? "…" : "→ Shipment"}
+                        </button>
+                      ) : <span className="text-xs text-muted-foreground">—</span>}
+                    </td>
+                  )}
+                  {isStaff && (
+                    <td className="px-6 py-4 actions-col">
                       {editId === q.id ? (
                         <div className="space-y-2 min-w-[200px]">
                           <label htmlFor={`quote-status-${q.id}`} className="sr-only">Quote Status</label>
@@ -188,6 +227,7 @@ export default function Quotes() {
                 </tr>
               ))}
             </tbody>
+            {/* Remove the duplicate "Convert" column header since we added it inline above */}
           </table>
         )}
       </div>

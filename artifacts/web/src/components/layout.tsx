@@ -4,8 +4,10 @@ import { useGetMe } from "@workspace/api-client-react";
 import {
   Package2, LayoutDashboard, Truck, LogOut, Loader2, Search,
   Users, FileText, Receipt, BarChart3, Shield, UserCircle,
-  Menu, X, Phone, ChevronRight,
+  Menu, X, Phone, ChevronRight, Bell,
 } from "lucide-react";
+import { useListNotifications, useMarkNotificationRead } from "@workspace/api-client-react";
+import { useState as useStateNotif } from "react";
 import { useState } from "react";
 
 const PHONE = "+1 202 753 0933";
@@ -16,7 +18,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { data: me } = useGetMe();
   const [location] = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useStateNotif(false);
   const role = me?.role;
+  const { data: notifications = [] } = useListNotifications({ query: { enabled: !!isAuthenticated, queryKey: ["listNotifications"] } });
+  const markRead = useMarkNotificationRead();
+  const unreadCount = notifications.filter((n: { read: boolean }) => !n.read).length;
 
   if (isLoading) {
     return (
@@ -28,12 +34,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) return <>{children}</>;
 
-  const isStaff = role === "staff" || role === "admin";
-  const isAdmin = role === "admin";
-  const isCustomer = role === "customer";
+  const roleStr = role as string | undefined;
+  const isStaff = ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(roleStr ?? "");
+  const isAdmin = roleStr === "admin" || roleStr === "manager";
+  const isCustomer = roleStr === "customer";
+  const isDriver = roleStr === "driver";
 
   const navGroups = [
-    ...(isStaff || isAdmin ? [{
+    ...(isStaff ? [{
       label: "Operations",
       items: [
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -49,6 +57,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         { href: "/reports", label: "Reports", icon: BarChart3 },
       ],
     }] : []),
+    ...(isDriver ? [{
+      label: "My Deliveries",
+      items: [
+        { href: "/shipments", label: "Assigned Shipments", icon: Package2 },
+        { href: "/track", label: "Track Shipment", icon: Search },
+      ],
+    }] : []),
     ...(isCustomer ? [{
       label: "My Account",
       items: [
@@ -60,15 +75,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Tools",
       items: [
-        { href: "/track", label: "Track Shipment", icon: Search },
-        ...(isAdmin ? [{ href: "/admin", label: "Admin", icon: Shield }] : []),
+        ...(isStaff || isDriver ? [{ href: "/track", label: "Track Shipment", icon: Search }] : []),
+        ...(isAdmin ? [{ href: "/admin", label: "User Management", icon: Shield }] : []),
+        ...(isAdmin ? [{ href: "/admin/contact-messages", label: "Contact Messages", icon: FileText }] : []),
       ],
     },
-  ];
+  ].filter(g => g.items.length > 0);
 
   const roleColors: Record<string, string> = {
     admin: "bg-red-100 text-red-700",
+    manager: "bg-rose-100 text-rose-700",
+    operations: "bg-blue-100 text-blue-700",
+    support: "bg-cyan-100 text-cyan-700",
+    tracking_agent: "bg-indigo-100 text-indigo-700",
     staff: "bg-blue-100 text-blue-700",
+    driver: "bg-yellow-100 text-yellow-700",
     customer: "bg-green-100 text-green-700",
   };
 
@@ -125,6 +146,45 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         ))}
       </nav>
+
+      {/* Notifications */}
+      <div className="px-3 py-2 border-t border-sidebar-border relative">
+        <button
+          onClick={() => setNotifOpen(v => !v)}
+          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground rounded-md transition-colors"
+        >
+          <Bell className="h-4 w-4 shrink-0" />
+          <span className="flex-1 text-left">Notifications</span>
+          {unreadCount > 0 && (
+            <span className="bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </button>
+        {notifOpen && (
+          <div className="absolute bottom-full left-2 right-2 mb-1 bg-popover border border-border rounded-lg shadow-xl z-50 max-h-72 overflow-y-auto">
+            <div className="px-3 py-2 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-wide">Notifications</div>
+            {notifications.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-6">No notifications yet.</p>
+            ) : (
+              notifications.slice(0, 10).map((n: { id: number; title: string; message: string; read: boolean; createdAt: string }) => (
+                <div key={n.id}
+                  onClick={() => { if (!n.read) markRead.mutate({ id: n.id }); }}
+                  className={`px-3 py-3 border-b border-border/50 last:border-0 cursor-pointer hover:bg-muted/50 ${!n.read ? "bg-primary/5" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className={`text-xs font-semibold ${!n.read ? "text-primary" : "text-foreground"}`}>{n.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{n.message}</p>
+                    </div>
+                    {!n.read && <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1" />}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Contact strip */}
       <div className="px-5 py-3 border-t border-sidebar-border">
