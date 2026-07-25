@@ -2,9 +2,14 @@ import express, { type Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { authMiddleware } from "./middlewares/authMiddleware";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app: Express = express();
 
@@ -34,5 +39,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
 
 app.use("/api", router);
+
+// Serve built frontend in production
+const webDistPath = path.resolve(__dirname, "../../web/dist/public");
+if (fs.existsSync(webDistPath)) {
+  app.use(express.static(webDistPath));
+  // SPA catch-all — send index.html for any non-API route
+  app.get(/^(?!\/api).*$/, (_req, res) => {
+    res.sendFile(path.join(webDistPath, "index.html"));
+  });
+}
 
 export default app;
