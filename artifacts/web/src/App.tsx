@@ -14,6 +14,13 @@ import ShipmentDetail from './pages/shipment-detail';
 import Track from './pages/track';
 import Login from './pages/login';
 import Home from './pages/home';
+import About from './pages/about';
+import Services from './pages/services';
+import Contact from './pages/contact';
+import Pricing from './pages/pricing';
+import Faqs from './pages/faqs';
+import Privacy from './pages/privacy';
+import Terms from './pages/terms';
 import Portal from './pages/portal';
 import Quotes from './pages/quotes';
 import Invoices from './pages/invoices';
@@ -47,9 +54,14 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/track" component={Track} />
 
-      <Route path="/">
-        <Home />
-      </Route>
+      <Route path="/" component={Home} />
+      <Route path="/about" component={About} />
+      <Route path="/services" component={Services} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/faqs" component={Faqs} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
 
       <Route path="/dashboard">
         <Layout><ProtectedRoute component={Dashboard} /></Layout>

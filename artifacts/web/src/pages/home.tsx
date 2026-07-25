@@ -100,13 +100,13 @@ export default function Home() {
       <div className="bg-[#1a2744] text-white text-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 lg:px-10">
           <div className="hidden items-center gap-5 sm:flex">
-            <a href="#" className="opacity-70 hover:opacity-100 transition-opacity">Track &amp; Trace</a>
+            <Link href="/track" className="opacity-70 hover:opacity-100 transition-opacity">Track &amp; Trace</Link>
             <span className="opacity-30">|</span>
-            <a href="#" className="opacity-70 hover:opacity-100 transition-opacity">Documents</a>
+            <Link href="/contact" className="opacity-70 hover:opacity-100 transition-opacity">Support</Link>
             <span className="opacity-30">|</span>
-            <a href="#" className="opacity-70 hover:opacity-100 transition-opacity">Support</a>
+            <Link href="/faqs" className="opacity-70 hover:opacity-100 transition-opacity">Help &amp; FAQs</Link>
             <span className="opacity-30">|</span>
-            <a href="#" className="opacity-70 hover:opacity-100 transition-opacity">Help &amp; FAQs</a>
+            <Link href="/pricing" className="opacity-70 hover:opacity-100 transition-opacity">Pricing</Link>
           </div>
           <div className="flex items-center gap-4 ml-auto">
             <a href={PHONE_HREF} className="flex items-center gap-1.5 font-semibold hover:text-[#ff6208] transition-colors">
@@ -134,10 +134,11 @@ export default function Home() {
 
           {/* Desktop nav */}
           <nav className="hidden items-center gap-7 text-sm font-semibold lg:flex" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            <a href="#services" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">Services</a>
-            <a href="#process" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">How It Works</a>
-            <Link href="/track" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">Track Shipment</Link>
-            <a href="#contact" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">Contact</a>
+            <Link href="/about" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">About</Link>
+            <Link href="/services" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">Services</Link>
+            <Link href="/track" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">Track</Link>
+            <Link href="/pricing" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">Pricing</Link>
+            <Link href="/contact" className="text-[#1a2744] hover:text-[#ff6208] transition-colors">Contact</Link>
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
@@ -163,10 +164,12 @@ export default function Home() {
         {/* Mobile dropdown */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-100 bg-white px-6 py-4 space-y-3 text-sm font-semibold" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            <a href="#services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Services</a>
-            <a href="#process" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">How It Works</a>
-            <Link href="/track" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Track Shipment</Link>
-            <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Contact</a>
+            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">About</Link>
+            <Link href="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Services</Link>
+            <Link href="/track" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Track</Link>
+            <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Pricing</Link>
+            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Contact</Link>
+            <Link href="/faqs" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">FAQs</Link>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-[#1a2744] hover:text-[#ff6208]">Staff Login</Link>
             <a href="#quote" onClick={() => setMobileMenuOpen(false)} className="block mt-2 rounded bg-[#ff6208] px-4 py-2.5 text-center text-white">Request a Quote</a>
             <a href={PHONE_HREF} className="flex items-center gap-2 py-2 text-[#ff6208]">
@@ -477,9 +480,9 @@ export default function Home() {
             <div>
               <h4 className="font-bold uppercase tracking-wider text-white text-xs mb-5" style={{ fontFamily: "'Montserrat', sans-serif" }}>Services</h4>
               <ul className="space-y-3 text-sm text-white/60">
-                <li><a href="#services" className="hover:text-white transition-colors">Express Delivery</a></li>
-                <li><a href="#services" className="hover:text-white transition-colors">Global Freight</a></li>
-                <li><a href="#services" className="hover:text-white transition-colors">Business Logistics</a></li>
+                <li><Link href="/services" className="hover:text-white transition-colors">Express Delivery</Link></li>
+                <li><Link href="/services" className="hover:text-white transition-colors">Global Freight</Link></li>
+                <li><Link href="/services" className="hover:text-white transition-colors">Business Logistics</Link></li>
                 <li><Link href="/track" className="hover:text-white transition-colors">Track Shipment</Link></li>
               </ul>
             </div>
@@ -488,9 +491,9 @@ export default function Home() {
             <div>
               <h4 className="font-bold uppercase tracking-wider text-white text-xs mb-5" style={{ fontFamily: "'Montserrat', sans-serif" }}>Company</h4>
               <ul className="space-y-3 text-sm text-white/60">
-                <li><a href="#process" className="hover:text-white transition-colors">How It Works</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Documents</a></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
                 <li><Link href="/login" className="hover:text-white transition-colors">Staff Login</Link></li>
               </ul>
             </div>
@@ -524,9 +527,9 @@ export default function Home() {
           <div className="mt-12 border-t border-white/10 pt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-white/40">
             <span>© 2026 Premier Logistics. All rights reserved.</span>
             <div className="flex gap-5">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms &amp; Conditions</a>
-              <a href="#" className="hover:text-white transition-colors">Legal</a>
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms &amp; Conditions</Link>
+              <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
             </div>
           </div>
         </div>
