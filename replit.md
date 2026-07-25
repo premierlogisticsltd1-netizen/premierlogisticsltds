@@ -14,8 +14,9 @@ A pnpm workspace containing the Premier Logistics React/Vite web app and its Exp
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string (injected automatically by Replit; no manual setup needed)
 - Required secret: `SESSION_SECRET` — used for browser session signing
-- Configured workflows: **Premier Logistics Web** serves the frontend on port 22333; **Premier Logistics API** serves the API on port 8080
+- Configured workflows: **artifacts/web: web** serves the frontend on port 22333; **artifacts/api-server: API Server** serves the API on port 8080
 - Verify the API at `GET /api/healthz` → `{"status":"ok"}`
+- Both workflows are running in the Replit environment; the frontend preview routes `/api/...` requests to the API server artifact automatically
 
 ## Stack
 
