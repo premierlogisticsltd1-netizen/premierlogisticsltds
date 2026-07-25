@@ -24,6 +24,8 @@ export const shipmentsTable = pgTable("shipments", {
   weight: real("weight"),
   description: text("description"),
   estimatedDelivery: text("estimated_delivery"),
+  /** FK to driversTable.id — nullable until a driver is assigned */
+  assignedDriverId: integer("assigned_driver_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()

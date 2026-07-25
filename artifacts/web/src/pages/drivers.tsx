@@ -98,8 +98,8 @@ export default function Drivers() {
               { key: "currentLocation", label: "Current Location" },
             ].map(({ key, label, required }) => (
               <div key={key}>
-                <label className="block text-sm font-medium mb-1">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
-                <input required={required} placeholder={label}
+                <label htmlFor={`drv-${key}`} className="block text-sm font-medium mb-1">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
+                <input id={`drv-${key}`} name={key} required={required} placeholder={label}
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50" />
@@ -145,13 +145,15 @@ export default function Drivers() {
               </div>
               {editId === d.id ? (
                 <div className="space-y-2 border-t border-border pt-3">
-                  <select value={editStatus} onChange={e => setEditStatus(e.target.value)}
+                  <label htmlFor={`drv-edit-status-${d.id}`} className="sr-only">Status</label>
+                  <select id={`drv-edit-status-${d.id}`} name="editStatus" value={editStatus} onChange={e => setEditStatus(e.target.value)}
                     className="w-full border border-input rounded px-2 py-1 text-sm bg-background">
                     <option value="available">Available</option>
                     <option value="on_delivery">On Delivery</option>
                     <option value="off_duty">Off Duty</option>
                   </select>
-                  <input placeholder="Location update" value={editLocation} onChange={e => setEditLocation(e.target.value)}
+                  <label htmlFor={`drv-edit-loc-${d.id}`} className="sr-only">Location update</label>
+                  <input id={`drv-edit-loc-${d.id}`} name="editLocation" placeholder="Location update" value={editLocation} onChange={e => setEditLocation(e.target.value)}
                     className="w-full border border-input rounded px-2 py-1 text-sm bg-background" />
                   <div className="flex gap-2">
                     <button onClick={() => handleUpdate(d.id)} disabled={updating}

@@ -1,6 +1,6 @@
 import { useGetPortalOverview, useRegisterAsCustomer } from "@workspace/api-client-react";
 import { useState } from "react";
-import { Package, FileText, Receipt, UserCircle, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Package, FileText, Receipt, UserCircle, CheckCircle2, Loader2, AlertCircle, Edit2, X, Save } from "lucide-react";
 import { Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -32,6 +32,31 @@ export default function Portal() {
   const { mutateAsync: register, isPending: registering } = useRegisterAsCustomer();
   const [form, setForm] = useState({ name: "", email: "", company: "", phone: "", address: "" });
   const [error, setError] = useState("");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", company: "", phone: "", address: "" });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
+
+  async function handleProfileSave(e: React.FormEvent) {
+    e.preventDefault();
+    setProfileSaving(true);
+    setProfileError("");
+    try {
+      const r = await fetch("/api/portal/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(profileForm),
+      });
+      if (!r.ok) throw new Error();
+      setEditingProfile(false);
+      qc.invalidateQueries();
+    } catch {
+      setProfileError("Failed to save profile. Please try again.");
+    } finally {
+      setProfileSaving(false);
+    }
+  }
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -197,27 +222,90 @@ export default function Portal() {
         </div>
       </div>
 
-      {/* Contact info */}
+      {/* Account Details / Profile Editing */}
       <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
-          <UserCircle className="h-5 w-5 text-primary" />
-          Account Details
-        </h2>
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          {[
-            ["Name", customer?.name],
-            ["Email", customer?.email],
-            ["Company", customer?.company || "—"],
-            ["Phone", customer?.phone || "—"],
-            ["Address", customer?.address || "—"],
-            ["Account Status", customer?.status ? formatStatus(customer.status) : "—"],
-          ].map(([label, value]) => (
-            <div key={label}>
-              <dt className="text-muted-foreground font-medium">{label}</dt>
-              <dd className="mt-0.5 font-medium text-foreground">{value}</dd>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+            <UserCircle className="h-5 w-5 text-primary" />
+            Account Details
+          </h2>
+          {!editingProfile ? (
+            <button
+              onClick={() => {
+                setProfileForm({
+                  name: customer?.name ?? "",
+                  company: customer?.company ?? "",
+                  phone: customer?.phone ?? "",
+                  address: customer?.address ?? "",
+                });
+                setEditingProfile(true);
+              }}
+              className="inline-flex items-center gap-1.5 text-xs border border-border rounded-md px-3 py-1.5 hover:bg-muted transition-colors"
+            >
+              <Edit2 className="h-3 w-3" /> Edit Profile
+            </button>
+          ) : (
+            <button onClick={() => setEditingProfile(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {editingProfile ? (
+          <form onSubmit={handleProfileSave} className="space-y-4">
+            {profileError && (
+              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                <AlertCircle className="h-4 w-4 shrink-0" />{profileError}
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { key: "name", label: "Full Name", required: true },
+                { key: "company", label: "Company" },
+                { key: "phone", label: "Phone", type: "tel" },
+                { key: "address", label: "Address" },
+              ].map(({ key, label, required, type }) => (
+                <div key={key}>
+                  <label htmlFor={`profile-${key}`} className="block text-sm font-medium mb-1">{label}{required && " *"}</label>
+                  <input
+                    id={`profile-${key}`}
+                    name={key}
+                    type={type ?? "text"}
+                    required={required}
+                    value={profileForm[key as keyof typeof profileForm]}
+                    onChange={e => setProfileForm(f => ({ ...f, [key]: e.target.value }))}
+                    className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </dl>
+            <div className="flex gap-3 pt-2">
+              <button type="submit" disabled={profileSaving}
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 px-4 py-2 rounded-md font-medium text-sm">
+                {profileSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {profileSaving ? "Saving…" : "Save Changes"}
+              </button>
+              <button type="button" onClick={() => setEditingProfile(false)}
+                className="border border-border px-4 py-2 rounded-md text-sm hover:bg-muted">Cancel</button>
+            </div>
+          </form>
+        ) : (
+          <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            {[
+              ["Name", customer?.name],
+              ["Email", customer?.email],
+              ["Company", customer?.company || "—"],
+              ["Phone", customer?.phone || "—"],
+              ["Address", customer?.address || "—"],
+              ["Account Status", customer?.status ? formatStatus(customer.status) : "—"],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-muted-foreground font-medium">{label}</dt>
+                <dd className="mt-0.5 font-medium text-foreground">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </div>
     </div>
   );

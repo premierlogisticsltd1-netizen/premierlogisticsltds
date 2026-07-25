@@ -7,6 +7,8 @@ import {
   useAddTrackingEvent,
   useDeleteShipment,
   useSubmitProofOfDelivery,
+  useAssignDriver,
+  useListDrivers,
   useGetMe,
   getGetShipmentQueryKey,
   getListShipmentEventsQueryKey,
@@ -15,7 +17,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   ArrowLeft, Package, MapPin, Clock, Scale, Calendar, Trash2,
-  CheckCircle2, Plus, Loader2, AlertCircle, FileText, Truck, ClipboardCheck
+  CheckCircle2, Plus, Loader2, AlertCircle, FileText, Truck, ClipboardCheck, UserCheck
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -40,12 +42,26 @@ export default function ShipmentDetail() {
   const { data: events, isLoading: isEventsLoading } = useListShipmentEvents(id, { query: { enabled: !!id, queryKey: getListShipmentEventsQueryKey(id) } });
 
   const { data: me } = useGetMe();
-  const isStaff = me?.role === "staff" || me?.role === "admin";
+  const roleStr = me?.role as string | undefined;
+  const isStaff = ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(roleStr ?? "");
 
   const updateShipment = useUpdateShipment();
   const addEvent = useAddTrackingEvent();
   const deleteShipment = useDeleteShipment();
   const submitPod = useSubmitProofOfDelivery();
+  const assignDriver = useAssignDriver();
+  const { data: drivers = [] } = useListDrivers({ query: { enabled: isStaff, queryKey: ["listDrivers"] } });
+
+  const [selectedDriverId, setSelectedDriverId] = useState<string>("");
+  const [assignSuccess, setAssignSuccess] = useState("");
+
+  const handleAssignDriver = async () => {
+    const driverId = selectedDriverId ? Number(selectedDriverId) : (null as unknown as number);
+    await assignDriver.mutateAsync({ id, data: { driverId } });
+    setAssignSuccess(driverId ? `Driver assigned successfully` : "Driver unassigned");
+    setTimeout(() => setAssignSuccess(""), 3000);
+    queryClient.invalidateQueries({ queryKey: getGetShipmentQueryKey(id) });
+  };
 
   const [podForm, setPodForm] = useState({ recipientName: "", notes: "" });
   const [podSubmitted, setPodSubmitted] = useState(false);
@@ -138,7 +154,10 @@ export default function ShipmentDetail() {
         </div>
         
         <div className="flex gap-2">
+          <label htmlFor="shipment-status-select" className="sr-only">Update shipment status</label>
           <select 
+            id="shipment-status-select"
+            name="shipmentStatus"
             value={shipment.status}
             onChange={(e) => handleUpdateStatus(e.target.value as ShipmentUpdateStatus)}
             disabled={updateShipment.isPending}
@@ -213,8 +232,10 @@ export default function ShipmentDetail() {
             <form onSubmit={handleAddEvent} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
+                  <label htmlFor="event-status" className="block text-sm font-medium mb-1">Status</label>
                   <select 
+                    id="event-status"
+                    name="eventStatus"
                     value={eventForm.status}
                     onChange={e => setEventForm(p => ({ ...p, status: e.target.value as TrackingEventInputStatus }))}
                     className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -225,8 +246,10 @@ export default function ShipmentDetail() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Current Location</label>
+                  <label htmlFor="event-location" className="block text-sm font-medium mb-1">Current Location</label>
                   <input
+                    id="event-location"
+                    name="location"
                     required
                     value={eventForm.location}
                     onChange={e => setEventForm(p => ({ ...p, location: e.target.value }))}
@@ -236,8 +259,10 @@ export default function ShipmentDetail() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Internal Notes (Optional)</label>
+                <label htmlFor="event-notes" className="block text-sm font-medium mb-1">Internal Notes (Optional)</label>
                 <input
+                  id="event-notes"
+                  name="notes"
                   value={eventForm.notes}
                   onChange={e => setEventForm(p => ({ ...p, notes: e.target.value }))}
                   placeholder="e.g. Package delayed due to weather"
@@ -258,6 +283,54 @@ export default function ShipmentDetail() {
           </div>
         </div>
 
+        {/* Assign Driver */}
+        {isStaff && (
+          <div className="bg-card border border-card-border rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-primary" />
+              Assign Driver
+            </h3>
+            {(shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId && (
+              <div className="mb-3 text-sm text-muted-foreground flex items-center gap-2">
+                <Truck className="h-4 w-4 text-primary" />
+                Currently: <span className="font-medium text-foreground">
+                  {(drivers as Array<{id: number; name: string}>).find(d => d.id === (shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId)?.name ?? `Driver #${(shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId}`}
+                </span>
+              </div>
+            )}
+            {assignSuccess && (
+              <div className="mb-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />{assignSuccess}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <label htmlFor="assign-driver-select" className="sr-only">Select Driver</label>
+              <select
+                id="assign-driver-select"
+                value={selectedDriverId}
+                onChange={e => setSelectedDriverId(e.target.value)}
+                className="flex-1 px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="">— Unassigned —</option>
+                {(drivers as Array<{id: number; name: string; status: string}>)
+                  .filter(d => d.status !== "inactive")
+                  .map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))
+                }
+              </select>
+              <button
+                onClick={handleAssignDriver}
+                disabled={assignDriver.isPending}
+                className="px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5 disabled:opacity-60"
+              >
+                {assignDriver.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+                {(shipment as unknown as { assignedDriverId?: number | null }).assignedDriverId ? "Reassign" : "Assign"}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Proof of Delivery */}
         {isStaff && shipment.status !== "delivered" && (
           <div className="bg-card border border-card-border rounded-lg shadow-sm p-6">
@@ -273,14 +346,14 @@ export default function ShipmentDetail() {
             ) : (
               <form onSubmit={handlePod} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Recipient Name <span className="text-red-500">*</span></label>
-                  <input required placeholder="Name of person who received the package"
+                  <label htmlFor="pod-recipientName" className="block text-sm font-medium mb-1">Recipient Name <span className="text-red-500">*</span></label>
+                  <input id="pod-recipientName" name="recipientName" required placeholder="Name of person who received the package"
                     value={podForm.recipientName} onChange={e => setPodForm(p => ({ ...p, recipientName: e.target.value }))}
                     className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Notes (optional)</label>
-                  <input placeholder="e.g. Left at reception desk"
+                  <label htmlFor="pod-notes" className="block text-sm font-medium mb-1">Notes (optional)</label>
+                  <input id="pod-notes" name="podNotes" placeholder="e.g. Left at reception desk"
                     value={podForm.notes} onChange={e => setPodForm(p => ({ ...p, notes: e.target.value }))}
                     className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>

@@ -14,6 +14,13 @@ import ShipmentDetail from './pages/shipment-detail';
 import Track from './pages/track';
 import Login from './pages/login';
 import Home from './pages/home';
+import About from './pages/about';
+import Services from './pages/services';
+import Contact from './pages/contact';
+import Pricing from './pages/pricing';
+import Faqs from './pages/faqs';
+import Privacy from './pages/privacy';
+import Terms from './pages/terms';
 import Portal from './pages/portal';
 import Quotes from './pages/quotes';
 import Invoices from './pages/invoices';
@@ -21,6 +28,12 @@ import Drivers from './pages/drivers';
 import Admin from './pages/admin';
 import Reports from './pages/reports';
 import Customers from './pages/customers';
+import Industries from './pages/industries';
+import Coverage from './pages/coverage';
+import Testimonials from './pages/testimonials';
+import Blog from './pages/blog';
+import Careers from './pages/careers';
+import ContactMessages from './pages/contact-messages';
 
 const queryClient = new QueryClient();
 
@@ -47,9 +60,19 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/track" component={Track} />
 
-      <Route path="/">
-        <Home />
-      </Route>
+      <Route path="/" component={Home} />
+      <Route path="/about" component={About} />
+      <Route path="/services" component={Services} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/faqs" component={Faqs} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/industries" component={Industries} />
+      <Route path="/coverage" component={Coverage} />
+      <Route path="/testimonials" component={Testimonials} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/careers" component={Careers} />
 
       <Route path="/dashboard">
         <Layout><ProtectedRoute component={Dashboard} /></Layout>
@@ -83,6 +106,9 @@ function Router() {
       </Route>
       <Route path="/admin">
         <Layout><ProtectedRoute component={Admin} /></Layout>
+      </Route>
+      <Route path="/admin/contact-messages">
+        <Layout><ProtectedRoute component={ContactMessages} /></Layout>
       </Route>
 
       <Route>

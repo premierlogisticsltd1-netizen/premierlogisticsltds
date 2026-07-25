@@ -3,10 +3,19 @@ import { useState } from "react";
 import { Shield, Loader2, AlertCircle, Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
-const ROLES = ["admin", "staff", "driver", "customer"] as const;
+const ROLES = ["admin", "manager", "operations", "support", "tracking_agent", "driver", "customer"] as const;
 
 function roleColor(role: string) {
-  return { admin: "bg-purple-100 text-purple-800 border-purple-200", staff: "bg-blue-100 text-blue-800 border-blue-200", driver: "bg-yellow-100 text-yellow-800 border-yellow-200", customer: "bg-green-100 text-green-800 border-green-200" }[role] ?? "bg-gray-100 text-gray-800 border-gray-200";
+  return {
+    admin: "bg-red-100 text-red-800 border-red-200",
+    manager: "bg-rose-100 text-rose-800 border-rose-200",
+    operations: "bg-blue-100 text-blue-800 border-blue-200",
+    support: "bg-cyan-100 text-cyan-800 border-cyan-200",
+    tracking_agent: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    staff: "bg-blue-100 text-blue-800 border-blue-200",
+    driver: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    customer: "bg-green-100 text-green-800 border-green-200",
+  }[role] ?? "bg-gray-100 text-gray-800 border-gray-200";
 }
 
 export default function Admin() {
@@ -34,6 +43,17 @@ export default function Admin() {
     return acc;
   }, {} as Record<string, number>);
 
+  const roleLabel: Record<string, string> = {
+    admin: "Admin",
+    manager: "Manager",
+    operations: "Operations",
+    support: "Support",
+    tracking_agent: "Tracking Agent",
+    staff: "Staff",
+    driver: "Driver",
+    customer: "Customer",
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div>
@@ -44,11 +64,11 @@ export default function Admin() {
       </div>
 
       {/* Role summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {ROLES.map(r => (
           <div key={r} className="bg-card border border-border rounded-lg p-4 shadow-sm text-center">
             <p className="text-2xl font-bold">{roleCounts[r] ?? 0}</p>
-            <span className={`inline-flex mt-1 items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${roleColor(r)}`}>{r}</span>
+            <span className={`inline-flex mt-1 items-center px-2 py-0.5 rounded-full text-xs font-medium border ${roleColor(r)}`}>{roleLabel[r] ?? r}</span>
           </div>
         ))}
       </div>
@@ -99,9 +119,10 @@ export default function Admin() {
                   <td className="px-6 py-4">
                     {editId === u.id ? (
                       <div className="flex gap-2 items-center">
-                        <select value={editRole} onChange={e => setEditRole(e.target.value)}
-                          className="border border-input rounded px-2 py-1 text-xs bg-background capitalize">
-                          {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                        <label htmlFor={`admin-role-${u.id}`} className="sr-only">Assign role to {u.firstName}</label>
+                        <select id={`admin-role-${u.id}`} name="userRole" value={editRole} onChange={e => setEditRole(e.target.value)}
+                          className="border border-input rounded px-2 py-1 text-xs bg-background">
+                          {ROLES.map(r => <option key={r} value={r}>{roleLabel[r] ?? r}</option>)}
                         </select>
                         <button onClick={() => handleRoleUpdate(u.id)} disabled={updating}
                           className="bg-primary text-primary-foreground rounded px-2 py-1 text-xs font-medium disabled:opacity-60">

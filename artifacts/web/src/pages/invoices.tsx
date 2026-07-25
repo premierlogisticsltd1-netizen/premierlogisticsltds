@@ -91,29 +91,29 @@ export default function Invoices() {
           {error && <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3"><AlertCircle className="h-4 w-4" />{error}</div>}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Amount ($) <span className="text-red-500">*</span></label>
-              <input type="number" min="0" step="0.01" required placeholder="0.00" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
+              <label htmlFor="inv-amount" className="block text-sm font-medium mb-1">Amount ($) <span className="text-red-500">*</span></label>
+              <input id="inv-amount" name="amount" type="number" min="0" step="0.01" required placeholder="0.00" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
                 className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Customer</label>
-              <select value={form.customerId} onChange={e => setForm(f => ({ ...f, customerId: e.target.value }))}
+              <label htmlFor="inv-customerId" className="block text-sm font-medium mb-1">Customer</label>
+              <select id="inv-customerId" name="customerId" value={form.customerId} onChange={e => setForm(f => ({ ...f, customerId: e.target.value }))}
                 className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50">
                 <option value="">— Select customer —</option>
                 {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Linked Shipment</label>
-              <select value={form.shipmentId} onChange={e => setForm(f => ({ ...f, shipmentId: e.target.value }))}
+              <label htmlFor="inv-shipmentId" className="block text-sm font-medium mb-1">Linked Shipment</label>
+              <select id="inv-shipmentId" name="shipmentId" value={form.shipmentId} onChange={e => setForm(f => ({ ...f, shipmentId: e.target.value }))}
                 className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50">
                 <option value="">— Select shipment —</option>
                 {shipments.map(s => <option key={s.id} value={s.id}>{s.trackingNumber} — {s.recipientName}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Due Date</label>
-              <input type="date" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
+              <label htmlFor="inv-dueDate" className="block text-sm font-medium mb-1">Due Date</label>
+              <input id="inv-dueDate" name="dueDate" type="date" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
                 className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
           </div>

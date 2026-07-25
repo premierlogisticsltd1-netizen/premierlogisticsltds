@@ -1,7 +1,8 @@
 import { useListQuotes, useCreateQuote, useUpdateQuote, useGetMe } from "@workspace/api-client-react";
 import { useState } from "react";
-import { FileText, Plus, X, Loader2, AlertCircle, ChevronDown } from "lucide-react";
+import { FileText, Plus, X, Loader2, AlertCircle, ChevronDown, PackagePlus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 function formatStatus(s: string) {
   return s.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
@@ -12,13 +13,15 @@ function statusColor(s: string) {
 
 export default function Quotes() {
   const qc = useQueryClient();
+  const [, setLocation] = useLocation();
   const { data: me } = useGetMe();
   const { data: quotes = [], isLoading } = useListQuotes();
   const { mutateAsync: createQuote, isPending: creating } = useCreateQuote();
   const { mutateAsync: updateQuote, isPending: updating } = useUpdateQuote();
 
-  const isStaff = me?.role === "staff" || me?.role === "admin";
+  const isStaff = ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(me?.role ?? "");
   const [showForm, setShowForm] = useState(false);
+  const [convertingId, setConvertingId] = useState<number | null>(null);
   const [form, setForm] = useState({ origin: "", destination: "", serviceType: "standard", weight: "", notes: "" });
   const [editId, setEditId] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState("");
@@ -43,6 +46,27 @@ export default function Quotes() {
       setEditId(null);
       qc.invalidateQueries();
     } catch { setError("Failed to update quote."); }
+  }
+
+  async function handleConvert(id: number) {
+    setConvertingId(id);
+    setError("");
+    try {
+      const r = await fetch(`/api/quotes/${id}/convert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({}),
+      });
+      if (!r.ok) { const d = await r.json(); throw new Error(d.error ?? "Failed"); }
+      const { shipment } = await r.json();
+      qc.invalidateQueries();
+      setLocation(`/shipments/${shipment.id}`);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to convert quote to shipment.");
+    } finally {
+      setConvertingId(null);
+    }
   }
 
   return (
@@ -75,8 +99,8 @@ export default function Quotes() {
               { key: "weight", label: "Weight (kg)", type: "number", placeholder: "0.0" },
             ].map(({ key, label, required, placeholder, type }) => (
               <div key={key}>
-                <label className="block text-sm font-medium mb-1">{label}</label>
-                <input type={type || "text"} required={required} placeholder={placeholder}
+                <label htmlFor={`quote-${key}`} className="block text-sm font-medium mb-1">{label}</label>
+                <input id={`quote-${key}`} name={key} type={type || "text"} required={required} placeholder={placeholder}
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -84,8 +108,8 @@ export default function Quotes() {
               </div>
             ))}
             <div>
-              <label className="block text-sm font-medium mb-1">Service Type</label>
-              <select value={form.serviceType} onChange={e => setForm(f => ({ ...f, serviceType: e.target.value }))}
+              <label htmlFor="quote-serviceType" className="block text-sm font-medium mb-1">Service Type</label>
+              <select id="quote-serviceType" name="serviceType" value={form.serviceType} onChange={e => setForm(f => ({ ...f, serviceType: e.target.value }))}
                 className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50">
                 <option value="standard">Standard</option>
                 <option value="express">Express</option>
@@ -95,8 +119,8 @@ export default function Quotes() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Notes (optional)</label>
-            <textarea rows={2} placeholder="Any special requirements…" value={form.notes}
+            <label htmlFor="quote-notes" className="block text-sm font-medium mb-1">Notes (optional)</label>
+            <textarea id="quote-notes" name="notes" rows={2} placeholder="Any special requirements…" value={form.notes}
               onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
           </div>
@@ -131,6 +155,7 @@ export default function Quotes() {
                 <th className="px-6 py-4 font-medium">Est. Cost</th>
                 <th className="px-6 py-4 font-medium">Status</th>
                 <th className="px-6 py-4 font-medium">Date</th>
+                {isStaff && <th className="px-6 py-4 font-medium">Convert</th>}
                 {isStaff && <th className="px-6 py-4 font-medium">Actions</th>}
               </tr>
             </thead>
@@ -159,13 +184,29 @@ export default function Quotes() {
                   <td className="px-6 py-4 text-muted-foreground">{new Date(q.createdAt).toLocaleDateString()}</td>
                   {isStaff && (
                     <td className="px-6 py-4">
+                      {q.status !== "rejected" ? (
+                        <button
+                          onClick={() => handleConvert(q.id)}
+                          disabled={convertingId === q.id}
+                          className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded px-2.5 py-1.5 font-medium disabled:opacity-60 transition-colors"
+                        >
+                          {convertingId === q.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <PackagePlus className="h-3 w-3" />}
+                          {convertingId === q.id ? "…" : "→ Shipment"}
+                        </button>
+                      ) : <span className="text-xs text-muted-foreground">—</span>}
+                    </td>
+                  )}
+                  {isStaff && (
+                    <td className="px-6 py-4 actions-col">
                       {editId === q.id ? (
                         <div className="space-y-2 min-w-[200px]">
-                          <select value={editStatus} onChange={e => setEditStatus(e.target.value)}
+                          <label htmlFor={`quote-status-${q.id}`} className="sr-only">Quote Status</label>
+                          <select id={`quote-status-${q.id}`} name="status" value={editStatus} onChange={e => setEditStatus(e.target.value)}
                             className="w-full border border-input rounded px-2 py-1 text-xs bg-background">
                             {["requested", "reviewing", "approved", "rejected"].map(s => <option key={s} value={s}>{formatStatus(s)}</option>)}
                           </select>
-                          <input type="number" placeholder="Cost ($)" value={editCost} onChange={e => setEditCost(e.target.value)}
+                          <label htmlFor={`quote-cost-${q.id}`} className="sr-only">Estimated Cost</label>
+                          <input id={`quote-cost-${q.id}`} name="estimatedCost" type="number" placeholder="Cost ($)" value={editCost} onChange={e => setEditCost(e.target.value)}
                             className="w-full border border-input rounded px-2 py-1 text-xs bg-background" />
                           <div className="flex gap-1">
                             <button onClick={() => handleUpdate(q.id)} disabled={updating}
@@ -186,6 +227,7 @@ export default function Quotes() {
                 </tr>
               ))}
             </tbody>
+            {/* Remove the duplicate "Convert" column header since we added it inline above */}
           </table>
         )}
       </div>
