@@ -1,6 +1,7 @@
 import { useGetReportsSummary } from "@workspace/api-client-react";
-import { BarChart3, TrendingUp, CheckCircle2, Truck, Receipt, FileText, Loader2, RefreshCw } from "lucide-react";
+import { BarChart3, TrendingUp, CheckCircle2, Truck, Receipt, FileText, Loader2, RefreshCw, Download } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 function StatCard({ label, value, sub, icon: Icon, color }: { label: string; value: string | number; sub?: string; icon: React.ElementType; color: string }) {
   return (
@@ -148,6 +149,87 @@ export default function Reports() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Shipments by status bar chart */}
+        <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+          <h2 className="font-bold text-lg mb-4 flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" />Shipments by Status</h2>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={[
+              { name: "Pending", count: (shipments?.total ?? 0) - (shipments?.delivered ?? 0) - (shipments?.inTransit ?? 0), fill: "#f59e0b" },
+              { name: "In Transit", count: shipments?.inTransit ?? 0, fill: "#3b82f6" },
+              { name: "Delivered", count: shipments?.delivered ?? 0, fill: "#22c55e" },
+            ]} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Bar dataKey="count" name="Shipments" radius={[4, 4, 0, 0]}>
+                {[{ fill: "#f59e0b" }, { fill: "#3b82f6" }, { fill: "#22c55e" }].map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Revenue pie chart */}
+        <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+          <h2 className="font-bold text-lg mb-4 flex items-center gap-2"><Receipt className="h-5 w-5 text-primary" />Revenue Split</h2>
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: "Collected", value: Number((invoices?.paid ?? 0).toFixed(2)) },
+                  { name: "Outstanding", value: Number((invoices?.outstanding ?? 0).toFixed(2)) },
+                ]}
+                cx="50%" cy="50%" outerRadius={80}
+                dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                <Cell fill="#22c55e" />
+                <Cell fill="#ef4444" />
+              </Pie>
+              <Tooltip formatter={(v: number) => `$${v.toLocaleString()}`} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Export */}
+      <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+        <h2 className="font-bold text-lg mb-4 flex items-center gap-2"><Download className="h-5 w-5 text-primary" />Export Report</h2>
+        <p className="text-sm text-muted-foreground mb-4">Download a summary of operations performance as CSV.</p>
+        <button
+          onClick={() => {
+            const rows = [
+              ["Metric", "Value"],
+              ["Total Shipments", shipments?.total ?? 0],
+              ["Delivered", shipments?.delivered ?? 0],
+              ["In Transit", shipments?.inTransit ?? 0],
+              ["Delivery Rate (%)", deliveryRate],
+              ["Total Billed ($)", (invoices?.billed ?? 0).toFixed(2)],
+              ["Collected ($)", (invoices?.paid ?? 0).toFixed(2)],
+              ["Outstanding ($)", (invoices?.outstanding ?? 0).toFixed(2)],
+              ["Collection Rate (%)", collectionRate],
+              ["Total Quotes", quotes?.total ?? 0],
+              ["Quotes Approved", quotes?.approved ?? 0],
+              ["Quote Conversion Rate (%)", quoteConversionRate],
+              ["Generated At", new Date().toISOString()],
+            ];
+            const csv = rows.map(r => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = `premier-logistics-report-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click(); URL.revokeObjectURL(url);
+          }}
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium"
+        >
+          <Download className="h-4 w-4" /> Export CSV
+        </button>
       </div>
     </div>
   );

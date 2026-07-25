@@ -11,6 +11,10 @@ export type UserProfileRole = typeof UserProfileRole[keyof typeof UserProfileRol
 
 export const UserProfileRole = {
   admin: 'admin',
+  manager: 'manager',
+  operations: 'operations',
+  support: 'support',
+  tracking_agent: 'tracking_agent',
   staff: 'staff',
   driver: 'driver',
   customer: 'customer',

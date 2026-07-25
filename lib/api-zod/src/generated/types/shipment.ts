@@ -5,6 +5,7 @@
  * Courier API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ShipmentServiceType } from './shipmentServiceType';
 import type { ShipmentStatus } from './shipmentStatus';
 
 export interface Shipment {
@@ -15,12 +16,21 @@ export interface Shipment {
   recipientName: string;
   recipientAddress: string;
   status: ShipmentStatus;
+  serviceType: ShipmentServiceType;
   /** @nullable */
   weight?: number | null;
+  /** @nullable */
+  width?: number | null;
+  /** @nullable */
+  height?: number | null;
+  /** @nullable */
+  length?: number | null;
   /** @nullable */
   description?: string | null;
   /** @nullable */
   estimatedDelivery?: string | null;
+  /** @nullable */
+  assignedDriverId?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -116,7 +116,7 @@ export const GetMeResponse = zod.object({
   "email": zod.string().nullable(),
   "firstName": zod.string().nullish(),
   "lastName": zod.string().nullish(),
-  "role": zod.enum(['admin', 'staff', 'driver', 'customer'])
+  "role": zod.enum(['admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer'])
 })
 
 
@@ -136,9 +136,14 @@ export const ListShipmentsResponseItem = zod.object({
   "recipientName": zod.string(),
   "recipientAddress": zod.string(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']),
   "weight": zod.number().nullish(),
+  "width": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "length": zod.number().nullish(),
   "description": zod.string().nullish(),
   "estimatedDelivery": zod.string().nullish(),
+  "assignedDriverId": zod.number().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -159,7 +164,11 @@ export const CreateShipmentBody = zod.object({
   "senderAddress": zod.string().min(1),
   "recipientName": zod.string().min(1),
   "recipientAddress": zod.string().min(1),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']).optional(),
   "weight": zod.number().optional(),
+  "width": zod.number().optional(),
+  "height": zod.number().optional(),
+  "length": zod.number().optional(),
   "description": zod.string().optional(),
   "estimatedDelivery": zod.string().optional()
 })
@@ -172,9 +181,14 @@ export const CreateShipmentResponse = zod.object({
   "recipientName": zod.string(),
   "recipientAddress": zod.string(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']),
   "weight": zod.number().nullish(),
+  "width": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "length": zod.number().nullish(),
   "description": zod.string().nullish(),
   "estimatedDelivery": zod.string().nullish(),
+  "assignedDriverId": zod.number().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -195,9 +209,14 @@ export const GetShipmentResponse = zod.object({
   "recipientName": zod.string(),
   "recipientAddress": zod.string(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']),
   "weight": zod.number().nullish(),
+  "width": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "length": zod.number().nullish(),
   "description": zod.string().nullish(),
   "estimatedDelivery": zod.string().nullish(),
+  "assignedDriverId": zod.number().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -216,7 +235,11 @@ export const UpdateShipmentBody = zod.object({
   "recipientName": zod.string().optional(),
   "recipientAddress": zod.string().optional(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']).optional(),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']).optional(),
   "weight": zod.number().optional(),
+  "width": zod.number().optional(),
+  "height": zod.number().optional(),
+  "length": zod.number().optional(),
   "description": zod.string().optional(),
   "estimatedDelivery": zod.string().optional()
 })
@@ -229,9 +252,14 @@ export const UpdateShipmentResponse = zod.object({
   "recipientName": zod.string(),
   "recipientAddress": zod.string(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']),
   "weight": zod.number().nullish(),
+  "width": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "length": zod.number().nullish(),
   "description": zod.string().nullish(),
   "estimatedDelivery": zod.string().nullish(),
+  "assignedDriverId": zod.number().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -259,6 +287,11 @@ export const ListShipmentEventsResponseItem = zod.object({
   "shipmentId": zod.number(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
   "location": zod.string(),
+  "city": zod.string().nullish(),
+  "country": zod.string().nullish(),
+  "facility": zod.string().nullish(),
+  "latitude": zod.number().nullish(),
+  "longitude": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "timestamp": zod.coerce.date(),
   "createdAt": zod.coerce.date()
@@ -279,6 +312,11 @@ export const AddTrackingEventParams = zod.object({
 export const AddTrackingEventBody = zod.object({
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
   "location": zod.string().min(1),
+  "city": zod.string().optional(),
+  "country": zod.string().optional(),
+  "facility": zod.string().optional(),
+  "latitude": zod.number().optional(),
+  "longitude": zod.number().optional(),
   "notes": zod.string().optional(),
   "timestamp": zod.coerce.date().optional()
 })
@@ -288,6 +326,11 @@ export const AddTrackingEventResponse = zod.object({
   "shipmentId": zod.number(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
   "location": zod.string(),
+  "city": zod.string().nullish(),
+  "country": zod.string().nullish(),
+  "facility": zod.string().nullish(),
+  "latitude": zod.number().nullish(),
+  "longitude": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "timestamp": zod.coerce.date(),
   "createdAt": zod.coerce.date()
@@ -314,9 +357,14 @@ export const AssignDriverResponse = zod.object({
   "recipientName": zod.string(),
   "recipientAddress": zod.string(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']),
   "weight": zod.number().nullish(),
+  "width": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "length": zod.number().nullish(),
   "description": zod.string().nullish(),
   "estimatedDelivery": zod.string().nullish(),
+  "assignedDriverId": zod.number().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }),
@@ -369,9 +417,14 @@ export const TrackShipmentResponse = zod.object({
   "recipientName": zod.string(),
   "recipientAddress": zod.string(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']),
   "weight": zod.number().nullish(),
+  "width": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "length": zod.number().nullish(),
   "description": zod.string().nullish(),
   "estimatedDelivery": zod.string().nullish(),
+  "assignedDriverId": zod.number().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }),
@@ -380,6 +433,11 @@ export const TrackShipmentResponse = zod.object({
   "shipmentId": zod.number(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
   "location": zod.string(),
+  "city": zod.string().nullish(),
+  "country": zod.string().nullish(),
+  "facility": zod.string().nullish(),
+  "latitude": zod.number().nullish(),
+  "longitude": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "timestamp": zod.coerce.date(),
   "createdAt": zod.coerce.date()
@@ -455,9 +513,14 @@ export const GetPortalOverviewResponse = zod.object({
   "recipientName": zod.string(),
   "recipientAddress": zod.string(),
   "status": zod.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed']),
+  "serviceType": zod.enum(['standard', 'express', 'overnight', 'economy', 'freight', 'international']),
   "weight": zod.number().nullish(),
+  "width": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "length": zod.number().nullish(),
   "description": zod.string().nullish(),
   "estimatedDelivery": zod.string().nullish(),
+  "assignedDriverId": zod.number().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })),
@@ -912,7 +975,7 @@ export const ListAdminUsersResponseItem = zod.object({
   "email": zod.string().nullable(),
   "firstName": zod.string().nullish(),
   "lastName": zod.string().nullish(),
-  "role": zod.enum(['admin', 'staff', 'driver', 'customer']),
+  "role": zod.enum(['admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer']),
   "createdAt": zod.coerce.date()
 })
 export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
@@ -926,7 +989,7 @@ export const UpdateUserRoleParams = zod.object({
 })
 
 export const UpdateUserRoleBody = zod.object({
-  "role": zod.enum(['admin', 'staff', 'driver', 'customer'])
+  "role": zod.enum(['admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer'])
 })
 
 export const UpdateUserRoleResponse = zod.object({
@@ -934,7 +997,7 @@ export const UpdateUserRoleResponse = zod.object({
   "email": zod.string().nullable(),
   "firstName": zod.string().nullish(),
   "lastName": zod.string().nullish(),
-  "role": zod.enum(['admin', 'staff', 'driver', 'customer']),
+  "role": zod.enum(['admin', 'manager', 'operations', 'support', 'tracking_agent', 'staff', 'driver', 'customer']),
   "createdAt": zod.coerce.date()
 })
 

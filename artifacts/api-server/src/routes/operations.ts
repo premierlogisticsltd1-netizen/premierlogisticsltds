@@ -1,7 +1,13 @@
 import { Router, type IRouter } from "express";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { db, customersTable, driversTable, invoicesTable, notificationsTable, proofOfDeliveryTable, quotesTable, shipmentsTable, usersTable, contactMessagesTable } from "@workspace/db";
+import { db, customersTable, driversTable, invoicesTable, notificationsTable, proofOfDeliveryTable, quotesTable, shipmentsTable, usersTable, contactMessagesTable, auditLogsTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../middlewares/authMiddleware";
+
+async function logAudit(userId: string | undefined, action: string, resource: string, resourceId?: string, details?: string, ipAddress?: string) {
+  try {
+    await db.insert(auditLogsTable).values({ userId: userId ?? null, action, resource, resourceId: resourceId ?? null, details: details ?? null, ipAddress: ipAddress ?? null });
+  } catch { /* non-blocking */ }
+}
 
 const router: IRouter = Router();
 // All 7 roles that have staff-level access
@@ -270,6 +276,39 @@ router.patch("/portal/profile", requireAuth, async (req, res): Promise<void> => 
     updatedAt: new Date(),
   }).where(eq(customersTable.id, customer.id)).returning();
   res.json(updated);
+});
+
+// First-admin setup — only works when zero admins exist.
+// Any authenticated user can call this; they become the first admin.
+router.post("/admin/setup", requireAuth, async (req, res): Promise<void> => {
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(eq(usersTable.role, "admin"));
+  if (Number(count) > 0) {
+    res.status(409).json({ error: "An admin already exists. Contact your system administrator." });
+    return;
+  }
+  const [user] = await db.update(usersTable).set({ role: "admin", updatedAt: new Date() }).where(eq(usersTable.id, req.user!.id)).returning();
+  await logAudit(req.user!.id, "FIRST_ADMIN_SETUP", "user", req.user!.id, "First admin promoted via setup endpoint", req.ip);
+  res.json({ message: "You are now the system administrator.", user });
+});
+
+// Audit log viewer — admin only
+router.get("/admin/audit-logs", requireRole("admin", "manager"), async (req, res): Promise<void> => {
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+  const offset = (page - 1) * limit;
+  const logs = await db.select().from(auditLogsTable).orderBy(desc(auditLogsTable.createdAt)).limit(limit).offset(offset);
+  res.json({ logs, page, limit });
+});
+
+// Admin: role management with audit logging
+router.patch("/admin/users/:id/role", requireRole("admin", "manager"), async (req, res): Promise<void> => {
+  const userId = String(req.params.id);
+  const role = bodyString(req.body?.role);
+  if (!role) { res.status(400).json({ error: "role is required" }); return; }
+  const [user] = await db.update(usersTable).set({ role: role as never, updatedAt: new Date() }).where(eq(usersTable.id, userId)).returning();
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+  await logAudit(req.user!.id, "ROLE_CHANGE", "user", userId, `Role changed to ${role}`, req.ip);
+  res.json(user);
 });
 
 export default router;

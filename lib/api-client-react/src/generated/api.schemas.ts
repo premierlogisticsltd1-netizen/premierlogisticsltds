@@ -56,6 +56,10 @@ export type UserProfileRole = typeof UserProfileRole[keyof typeof UserProfileRol
 
 export const UserProfileRole = {
   admin: 'admin',
+  manager: 'manager',
+  operations: 'operations',
+  support: 'support',
+  tracking_agent: 'tracking_agent',
   staff: 'staff',
   driver: 'driver',
   customer: 'customer',
@@ -84,6 +88,18 @@ export const ShipmentStatus = {
   failed: 'failed',
 } as const;
 
+export type ShipmentServiceType = typeof ShipmentServiceType[keyof typeof ShipmentServiceType];
+
+
+export const ShipmentServiceType = {
+  standard: 'standard',
+  express: 'express',
+  overnight: 'overnight',
+  economy: 'economy',
+  freight: 'freight',
+  international: 'international',
+} as const;
+
 export interface Shipment {
   id: number;
   trackingNumber: string;
@@ -92,15 +108,36 @@ export interface Shipment {
   recipientName: string;
   recipientAddress: string;
   status: ShipmentStatus;
+  serviceType: ShipmentServiceType;
   /** @nullable */
   weight?: number | null;
+  /** @nullable */
+  width?: number | null;
+  /** @nullable */
+  height?: number | null;
+  /** @nullable */
+  length?: number | null;
   /** @nullable */
   description?: string | null;
   /** @nullable */
   estimatedDelivery?: string | null;
+  /** @nullable */
+  assignedDriverId?: number | null;
   createdAt: string;
   updatedAt: string;
 }
+
+export type ShipmentInputServiceType = typeof ShipmentInputServiceType[keyof typeof ShipmentInputServiceType];
+
+
+export const ShipmentInputServiceType = {
+  standard: 'standard',
+  express: 'express',
+  overnight: 'overnight',
+  economy: 'economy',
+  freight: 'freight',
+  international: 'international',
+} as const;
 
 export interface ShipmentInput {
   /** @minLength 1 */
@@ -111,7 +148,11 @@ export interface ShipmentInput {
   recipientName: string;
   /** @minLength 1 */
   recipientAddress: string;
+  serviceType?: ShipmentInputServiceType;
   weight?: number;
+  width?: number;
+  height?: number;
+  length?: number;
   description?: string;
   estimatedDelivery?: string;
 }
@@ -128,13 +169,29 @@ export const ShipmentUpdateStatus = {
   failed: 'failed',
 } as const;
 
+export type ShipmentUpdateServiceType = typeof ShipmentUpdateServiceType[keyof typeof ShipmentUpdateServiceType];
+
+
+export const ShipmentUpdateServiceType = {
+  standard: 'standard',
+  express: 'express',
+  overnight: 'overnight',
+  economy: 'economy',
+  freight: 'freight',
+  international: 'international',
+} as const;
+
 export interface ShipmentUpdate {
   senderName?: string;
   senderAddress?: string;
   recipientName?: string;
   recipientAddress?: string;
   status?: ShipmentUpdateStatus;
+  serviceType?: ShipmentUpdateServiceType;
   weight?: number;
+  width?: number;
+  height?: number;
+  length?: number;
   description?: string;
   estimatedDelivery?: string;
 }
@@ -157,6 +214,16 @@ export interface TrackingEvent {
   status: TrackingEventStatus;
   location: string;
   /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  facility?: string | null;
+  /** @nullable */
+  latitude?: number | null;
+  /** @nullable */
+  longitude?: number | null;
+  /** @nullable */
   notes?: string | null;
   timestamp: string;
   createdAt: string;
@@ -178,6 +245,11 @@ export interface TrackingEventInput {
   status: TrackingEventInputStatus;
   /** @minLength 1 */
   location: string;
+  city?: string;
+  country?: string;
+  facility?: string;
+  latitude?: number;
+  longitude?: number;
   notes?: string;
   timestamp?: string;
 }
@@ -520,6 +592,10 @@ export type AdminUserRole = typeof AdminUserRole[keyof typeof AdminUserRole];
 
 export const AdminUserRole = {
   admin: 'admin',
+  manager: 'manager',
+  operations: 'operations',
+  support: 'support',
+  tracking_agent: 'tracking_agent',
   staff: 'staff',
   driver: 'driver',
   customer: 'customer',
@@ -542,6 +618,10 @@ export type UserRoleUpdateRole = typeof UserRoleUpdateRole[keyof typeof UserRole
 
 export const UserRoleUpdateRole = {
   admin: 'admin',
+  manager: 'manager',
+  operations: 'operations',
+  support: 'support',
+  tracking_agent: 'tracking_agent',
   staff: 'staff',
   driver: 'driver',
   customer: 'customer',

@@ -194,6 +194,18 @@ export default function ShipmentDetail() {
                       <Scale className="h-4 w-4 text-muted-foreground" />
                       {shipment.weight ? `${shipment.weight} kg` : 'Not specified'}
                     </div>
+                    {(shipment.width || shipment.height || shipment.length) && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Package className="h-4 w-4" />
+                        <span>{shipment.length ?? '?'} × {shipment.width ?? '?'} × {shipment.height ?? '?'} cm (L×W×H)</span>
+                      </div>
+                    )}
+                    {shipment.serviceType && (
+                      <div className="flex items-center gap-2 text-muted-foreground capitalize">
+                        <Truck className="h-4 w-4" />
+                        {shipment.serviceType.replace('_', ' ')} service
+                      </div>
+                    )}
                     {shipment.description && (
                       <div className="flex items-start gap-2">
                         <Package className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -218,6 +230,17 @@ export default function ShipmentDetail() {
                       Est: {shipment.estimatedDelivery ? format(new Date(shipment.estimatedDelivery), "PP") : 'Not set'}
                     </div>
                   </div>
+                </div>
+                {/* QR Code */}
+                <div className="pt-4 border-t border-border flex flex-col items-center gap-2">
+                  <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Scan to Track</div>
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(shipment.trackingNumber)}&color=1a2744`}
+                    alt={`QR for ${shipment.trackingNumber}`}
+                    width={120} height={120}
+                    className="rounded border border-border p-1 bg-white"
+                  />
+                  <span className="font-mono text-xs text-muted-foreground">{shipment.trackingNumber}</span>
                 </div>
               </div>
             </div>

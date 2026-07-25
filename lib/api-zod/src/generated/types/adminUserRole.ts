@@ -11,6 +11,10 @@ export type AdminUserRole = typeof AdminUserRole[keyof typeof AdminUserRole];
 
 export const AdminUserRole = {
   admin: 'admin',
+  manager: 'manager',
+  operations: 'operations',
+  support: 'support',
+  tracking_agent: 'tracking_agent',
   staff: 'staff',
   driver: 'driver',
   customer: 'customer',

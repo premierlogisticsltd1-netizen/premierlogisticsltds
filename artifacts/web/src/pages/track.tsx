@@ -146,6 +146,52 @@ export default function Track() {
                 </div>
               )}
 
+              {/* Shipment Details */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {shipment.weight && (
+                  <div className="bg-card border border-card-border p-5 rounded-lg shadow-sm">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Weight</p>
+                    <p className="font-semibold text-lg">{shipment.weight} kg</p>
+                  </div>
+                )}
+                {(shipment.width || shipment.height || shipment.length) && (
+                  <div className="bg-card border border-card-border p-5 rounded-lg shadow-sm">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Dimensions (cm)</p>
+                    <p className="font-semibold">{shipment.length ?? '—'} × {shipment.width ?? '—'} × {shipment.height ?? '—'}</p>
+                  </div>
+                )}
+                {shipment.serviceType && (
+                  <div className="bg-card border border-card-border p-5 rounded-lg shadow-sm">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Service</p>
+                    <p className="font-semibold capitalize">{shipment.serviceType.replace('_', ' ')}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* QR Code + Estimated Delivery */}
+              <div className="flex flex-col md:flex-row gap-4">
+                {shipment.estimatedDelivery && (
+                  <div className="flex-1 bg-blue-50 border border-blue-100 p-6 rounded-lg flex items-center gap-4 text-blue-900 dark:bg-blue-900/20 dark:border-blue-900/30 dark:text-blue-200">
+                    <Calendar className="h-6 w-6 shrink-0" />
+                    <div>
+                      <p className="font-bold">Estimated Delivery</p>
+                      <p className="text-lg">{format(new Date(shipment.estimatedDelivery), "EEEE, MMMM do yyyy")}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="bg-card border border-card-border p-6 rounded-lg shadow-sm flex flex-col items-center gap-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Scan to Track</p>
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(shipment.trackingNumber)}&color=1a2744`}
+                    alt={`QR code for ${shipment.trackingNumber}`}
+                    width={120}
+                    height={120}
+                    className="rounded"
+                  />
+                  <p className="font-mono text-xs text-muted-foreground">{shipment.trackingNumber}</p>
+                </div>
+              </div>
+
               {/* Timeline */}
               <div className="bg-card border border-card-border rounded-lg shadow-sm p-6 md:p-8">
                 <h3 className="text-xl font-bold mb-8">Travel History</h3>
@@ -154,7 +200,7 @@ export default function Track() {
                   <p className="text-muted-foreground text-center py-8">No tracking events available yet.</p>
                 ) : (
                   <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-border">
-                    {events.map((event, i) => {
+                    {[...events].reverse().map((event, i) => {
                       const isLatest = i === 0;
                       return (
                         <div key={event.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
@@ -168,8 +214,16 @@ export default function Track() {
                             </div>
                             <div className="text-foreground/80 flex items-center gap-2">
                               <MapPin className="h-4 w-4 text-primary" />
-                              {event.location}
+                              <span>{event.location}{event.city ? `, ${event.city}` : ''}{event.country ? `, ${event.country}` : ''}</span>
                             </div>
+                            {event.facility && (
+                              <p className="mt-1 text-sm text-muted-foreground">Facility: {event.facility}</p>
+                            )}
+                            {(event.latitude && event.longitude) && (
+                              <p className="mt-1 text-xs text-muted-foreground font-mono">
+                                {event.latitude.toFixed(4)}, {event.longitude.toFixed(4)}
+                              </p>
+                            )}
                             {event.notes && (
                               <p className="mt-3 text-sm text-muted-foreground italic bg-background p-3 rounded border border-border/50">
                                 "{event.notes}"

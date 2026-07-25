@@ -1,6 +1,7 @@
 import { useGetDashboardStats, useListShipments } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { Package, Truck, CheckCircle2, Clock, AlertCircle, TrendingUp, Loader2 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
@@ -161,6 +162,34 @@ export default function Dashboard() {
             <Link href="/shipments" className="mt-6 w-full inline-flex justify-center items-center px-4 py-2 border border-border shadow-sm text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted transition-colors">
               Manage Queue
             </Link>
+          </div>
+
+          {/* Status chart */}
+          <div className="bg-card border border-card-border p-6 rounded-lg shadow-sm">
+            <h3 className="font-bold tracking-tight mb-4 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Status Overview
+            </h3>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={[
+                { name: "Pending", count: stats?.pending || 0, fill: "#f59e0b" },
+                { name: "Picked Up", count: stats?.pickedUp || 0, fill: "#a78bfa" },
+                { name: "Transit", count: stats?.inTransit || 0, fill: "#3b82f6" },
+                { name: "Out", count: stats?.outForDelivery || 0, fill: "#fb923c" },
+                { name: "Done", count: stats?.delivered || 0, fill: "#22c55e" },
+                { name: "Failed", count: stats?.failed || 0, fill: "#ef4444" },
+              ]} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Bar dataKey="count" name="Shipments" radius={[3, 3, 0, 0]}>
+                  {["#f59e0b","#a78bfa","#3b82f6","#fb923c","#22c55e","#ef4444"].map((fill, i) => (
+                    <Cell key={i} fill={fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

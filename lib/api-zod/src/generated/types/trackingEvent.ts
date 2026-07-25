@@ -13,6 +13,16 @@ export interface TrackingEvent {
   status: TrackingEventStatus;
   location: string;
   /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  facility?: string | null;
+  /** @nullable */
+  latitude?: number | null;
+  /** @nullable */
+  longitude?: number | null;
+  /** @nullable */
   notes?: string | null;
   timestamp: Date;
   createdAt: Date;

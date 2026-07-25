@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { shipmentsTable } from "./shipments";
@@ -10,6 +10,11 @@ export const trackingEventsTable = pgTable("tracking_events", {
     .references(() => shipmentsTable.id, { onDelete: "cascade" }),
   status: text("status").notNull(),
   location: text("location").notNull(),
+  city: text("city"),
+  country: text("country"),
+  facility: text("facility"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   notes: text("notes"),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

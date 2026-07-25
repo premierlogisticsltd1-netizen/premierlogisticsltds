@@ -11,7 +11,17 @@ export const SHIPMENT_STATUSES = [
   "failed",
 ] as const;
 
+export const SERVICE_TYPES = [
+  "standard",
+  "express",
+  "overnight",
+  "economy",
+  "freight",
+  "international",
+] as const;
+
 export type ShipmentStatus = (typeof SHIPMENT_STATUSES)[number];
+export type ServiceType = (typeof SERVICE_TYPES)[number];
 
 export const shipmentsTable = pgTable("shipments", {
   id: serial("id").primaryKey(),
@@ -21,7 +31,14 @@ export const shipmentsTable = pgTable("shipments", {
   recipientName: text("recipient_name").notNull(),
   recipientAddress: text("recipient_address").notNull(),
   status: text("status").notNull().default("pending"),
+  serviceType: text("service_type").notNull().default("standard"),
   weight: real("weight"),
+  /** Width in cm */
+  width: real("width"),
+  /** Height in cm */
+  height: real("height"),
+  /** Length in cm */
+  length: real("length"),
   description: text("description"),
   estimatedDelivery: text("estimated_delivery"),
   /** FK to driversTable.id — nullable until a driver is assigned */

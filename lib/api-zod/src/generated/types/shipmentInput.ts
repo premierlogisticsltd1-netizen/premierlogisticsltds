@@ -5,6 +5,7 @@
  * Courier API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ShipmentInputServiceType } from './shipmentInputServiceType';
 
 export interface ShipmentInput {
   /** @minLength 1 */
@@ -15,7 +16,11 @@ export interface ShipmentInput {
   recipientName: string;
   /** @minLength 1 */
   recipientAddress: string;
+  serviceType?: ShipmentInputServiceType;
   weight?: number;
+  width?: number;
+  height?: number;
+  length?: number;
   description?: string;
   estimatedDelivery?: string;
 }

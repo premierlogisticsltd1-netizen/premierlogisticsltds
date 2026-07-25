@@ -11,6 +11,11 @@ export interface TrackingEventInput {
   status: TrackingEventInputStatus;
   /** @minLength 1 */
   location: string;
+  city?: string;
+  country?: string;
+  facility?: string;
+  latitude?: number;
+  longitude?: number;
   notes?: string;
   timestamp?: Date;
 }

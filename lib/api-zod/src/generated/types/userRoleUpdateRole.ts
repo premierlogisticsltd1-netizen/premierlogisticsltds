@@ -11,6 +11,10 @@ export type UserRoleUpdateRole = typeof UserRoleUpdateRole[keyof typeof UserRole
 
 export const UserRoleUpdateRole = {
   admin: 'admin',
+  manager: 'manager',
+  operations: 'operations',
+  support: 'support',
+  tracking_agent: 'tracking_agent',
   staff: 'staff',
   driver: 'driver',
   customer: 'customer',

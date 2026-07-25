@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useListShipments } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Search, Filter, Loader2, Package, MoreHorizontal, MapPin } from "lucide-react";
+import { Search, Loader2, Package, Download } from "lucide-react";
 import { format } from "date-fns";
 import type { ListShipmentsStatus } from "@workspace/api-client-react";
 
@@ -50,13 +50,35 @@ export default function Shipments() {
           <h1 className="text-3xl font-bold tracking-tight">Shipments</h1>
           <p className="text-muted-foreground mt-1">Manage and track all logistics parcels.</p>
         </div>
-        <Link 
-          href="/shipments/new" 
-          className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium text-sm shadow-sm inline-flex items-center gap-2"
-        >
-          <Package className="h-4 w-4" />
-          Create Shipment
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (!shipments?.length) return;
+              const headers = ["Tracking #", "Sender", "Sender Address", "Recipient", "Recipient Address", "Status", "Service", "Weight (kg)", "Est. Delivery", "Created"];
+              const rows = shipments.map(s => [
+                s.trackingNumber, s.senderName, s.senderAddress, s.recipientName, s.recipientAddress,
+                s.status, s.serviceType ?? "standard", s.weight ?? "", s.estimatedDelivery ?? "",
+                new Date(s.createdAt).toISOString(),
+              ]);
+              const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url;
+              a.download = `shipments-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="inline-flex items-center gap-2 border border-border px-3 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
+          >
+            <Download className="h-4 w-4" /> Export CSV
+          </button>
+          <Link 
+            href="/shipments/new" 
+            className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium text-sm shadow-sm inline-flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            Create Shipment
+          </Link>
+        </div>
       </div>
 
       <div className="bg-card border border-card-border rounded-lg shadow-sm flex flex-col flex-1 min-h-[500px]">

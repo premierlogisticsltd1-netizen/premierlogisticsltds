@@ -75,6 +75,11 @@ router.post("/shipments/:id/events", requireAuth, async (req, res): Promise<void
       shipmentId: params.data.id,
       status: parsed.data.status,
       location: parsed.data.location,
+      city: parsed.data.city ?? null,
+      country: parsed.data.country ?? null,
+      facility: parsed.data.facility ?? null,
+      latitude: parsed.data.latitude ?? null,
+      longitude: parsed.data.longitude ?? null,
       notes: parsed.data.notes,
       timestamp: parsed.data.timestamp ? new Date(parsed.data.timestamp) : new Date(),
     })

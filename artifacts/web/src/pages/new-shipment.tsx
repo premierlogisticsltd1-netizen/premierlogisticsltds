@@ -300,7 +300,11 @@ export default function NewShipment() {
     senderAddress: "",
     recipientName: "",
     recipientAddress: "",
+    serviceType: "standard",
     weight: "",
+    width: "",
+    height: "",
+    length: "",
     description: "",
     estimatedDelivery: "",
   });
@@ -314,7 +318,11 @@ export default function NewShipment() {
           senderAddress: formData.senderAddress,
           recipientName: formData.recipientName,
           recipientAddress: formData.recipientAddress,
+          serviceType: formData.serviceType as never,
           weight: formData.weight ? Number(formData.weight) : undefined,
+          width: formData.width ? Number(formData.width) : undefined,
+          height: formData.height ? Number(formData.height) : undefined,
+          length: formData.length ? Number(formData.length) : undefined,
           description: formData.description || undefined,
           estimatedDelivery: formData.estimatedDelivery
             ? new Date(formData.estimatedDelivery).toISOString()
@@ -418,6 +426,19 @@ export default function NewShipment() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
+              <label htmlFor="serviceType" className="block text-sm font-medium mb-1">Service Type</label>
+              <select id="serviceType" name="serviceType" value={formData.serviceType}
+                onChange={e => setFormData(p => ({ ...p, serviceType: e.target.value }))}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm">
+                <option value="standard">Standard</option>
+                <option value="express">Express</option>
+                <option value="overnight">Overnight</option>
+                <option value="economy">Economy</option>
+                <option value="freight">Freight</option>
+                <option value="international">International</option>
+              </select>
+            </div>
+            <div>
               <label htmlFor="weight" className="block text-sm font-medium mb-1 flex items-center gap-1">
                 <Scale className="h-3 w-3 text-muted-foreground" /> Weight (kg)
               </label>
@@ -431,6 +452,26 @@ export default function NewShipment() {
               </label>
               <input id="estimatedDelivery" type="date" name="estimatedDelivery" value={formData.estimatedDelivery} onChange={handleChange}
                 className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div>
+              <label htmlFor="length" className="block text-sm font-medium mb-1">Length (cm)</label>
+              <input id="length" type="number" step="0.1" name="length" value={formData.length} onChange={handleChange}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                placeholder="0.0" />
+            </div>
+            <div>
+              <label htmlFor="width" className="block text-sm font-medium mb-1">Width (cm)</label>
+              <input id="width" type="number" step="0.1" name="width" value={formData.width} onChange={handleChange}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                placeholder="0.0" />
+            </div>
+            <div>
+              <label htmlFor="height" className="block text-sm font-medium mb-1">Height (cm)</label>
+              <input id="height" type="number" step="0.1" name="height" value={formData.height} onChange={handleChange}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                placeholder="0.0" />
             </div>
             <div>
               <label htmlFor="description" className="block text-sm font-medium mb-1">Description / Notes</label>

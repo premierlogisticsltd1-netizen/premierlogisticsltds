@@ -97,6 +97,19 @@ export const contactMessagesTable = pgTable("contact_messages", {
 });
 export type ContactMessage = typeof contactMessagesTable.$inferSelect;
 
+export const auditLogsTable = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id"),
+  action: text("action").notNull(),
+  resource: text("resource").notNull(),
+  resourceId: text("resource_id"),
+  details: text("details"),
+  ipAddress: text("ip_address"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type AuditLog = typeof auditLogsTable.$inferSelect;
+
 export const insertCustomerSchema = createInsertSchema(customersTable).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertDriverSchema = createInsertSchema(driversTable).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertQuoteSchema = createInsertSchema(quotesTable).omit({ id: true, quoteNumber: true, createdAt: true, updatedAt: true });
