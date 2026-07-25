@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, ilike, or, and } from "drizzle-orm";
+import { eq, ilike, or, and, sql } from "drizzle-orm";
 import { db, shipmentsTable } from "@workspace/db";
 import {
   ListShipmentsQueryParams,
@@ -18,12 +18,23 @@ import { requireAuth } from "../middlewares/authMiddleware";
 const router: IRouter = Router();
 router.use("/shipments", requireAuth);
 
-function generateTrackingNumber(): string {
-  const prefix = "CRR";
-  const digits = Math.floor(Math.random() * 1_000_000_000)
-    .toString()
-    .padStart(9, "0");
-  return `${prefix}${digits}`;
+/**
+ * Generates a tracking number in the format PL-YYYYMMDD-NNNNNN where NNNNNN
+ * is a zero-padded daily sequence (resets each calendar day).
+ * The DB UNIQUE constraint catches the rare concurrent-insert collision.
+ */
+async function generateTrackingNumber(): Promise<string> {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+  const prefix = `PL-${dateStr}-`;
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(shipmentsTable)
+    .where(ilike(shipmentsTable.trackingNumber, `${prefix}%`));
+
+  const seq = (Number(count) + 1).toString().padStart(6, "0");
+  return `${prefix}${seq}`;
 }
 
 router.get("/shipments", async (req, res): Promise<void> => {
@@ -70,7 +81,7 @@ router.post("/shipments", async (req, res): Promise<void> => {
     return;
   }
 
-  const trackingNumber = generateTrackingNumber();
+  const trackingNumber = await generateTrackingNumber();
   const [shipment] = await db
     .insert(shipmentsTable)
     .values({ ...parsed.data, trackingNumber })

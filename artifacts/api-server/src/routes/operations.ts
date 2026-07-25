@@ -74,10 +74,20 @@ router.patch("/drivers/:id", staff, async (req, res): Promise<void> => {
 });
 
 router.post("/shipments/:id/assign", staff, async (req, res): Promise<void> => {
-  const driverId = id(req.body?.driverId);
-  const [shipment] = await db.update(shipmentsTable).set({ updatedAt: new Date() }).where(eq(shipmentsTable.id, id(req.params.id))).returning();
+  const driverId = req.body?.driverId ? id(req.body.driverId) : null;
+  const [shipment] = await db
+    .update(shipmentsTable)
+    .set({ assignedDriverId: driverId, updatedAt: new Date() })
+    .where(eq(shipmentsTable.id, id(req.params.id)))
+    .returning();
   if (!shipment) { res.status(404).json({ error: "Shipment not found" }); return; }
-  res.json({ shipment, driverId, message: "Assignment recorded for dispatch" });
+
+  // Fetch driver name for the response
+  const driver = driverId
+    ? (await db.select({ id: driversTable.id, name: driversTable.name }).from(driversTable).where(eq(driversTable.id, driverId)))[0]
+    : null;
+
+  res.json({ shipment, driver, message: driver ? `Assigned to ${driver.name}` : "Driver unassigned" });
 });
 
 router.get("/quotes", staff, async (_req, res): Promise<void> => {
