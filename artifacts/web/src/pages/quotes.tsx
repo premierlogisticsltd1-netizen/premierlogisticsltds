@@ -75,8 +75,8 @@ export default function Quotes() {
               { key: "weight", label: "Weight (kg)", type: "number", placeholder: "0.0" },
             ].map(({ key, label, required, placeholder, type }) => (
               <div key={key}>
-                <label className="block text-sm font-medium mb-1">{label}</label>
-                <input type={type || "text"} required={required} placeholder={placeholder}
+                <label htmlFor={`quote-${key}`} className="block text-sm font-medium mb-1">{label}</label>
+                <input id={`quote-${key}`} name={key} type={type || "text"} required={required} placeholder={placeholder}
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -84,8 +84,8 @@ export default function Quotes() {
               </div>
             ))}
             <div>
-              <label className="block text-sm font-medium mb-1">Service Type</label>
-              <select value={form.serviceType} onChange={e => setForm(f => ({ ...f, serviceType: e.target.value }))}
+              <label htmlFor="quote-serviceType" className="block text-sm font-medium mb-1">Service Type</label>
+              <select id="quote-serviceType" name="serviceType" value={form.serviceType} onChange={e => setForm(f => ({ ...f, serviceType: e.target.value }))}
                 className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50">
                 <option value="standard">Standard</option>
                 <option value="express">Express</option>
@@ -95,8 +95,8 @@ export default function Quotes() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Notes (optional)</label>
-            <textarea rows={2} placeholder="Any special requirements…" value={form.notes}
+            <label htmlFor="quote-notes" className="block text-sm font-medium mb-1">Notes (optional)</label>
+            <textarea id="quote-notes" name="notes" rows={2} placeholder="Any special requirements…" value={form.notes}
               onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
           </div>
@@ -161,11 +161,13 @@ export default function Quotes() {
                     <td className="px-6 py-4">
                       {editId === q.id ? (
                         <div className="space-y-2 min-w-[200px]">
-                          <select value={editStatus} onChange={e => setEditStatus(e.target.value)}
+                          <label htmlFor={`quote-status-${q.id}`} className="sr-only">Quote Status</label>
+                          <select id={`quote-status-${q.id}`} name="status" value={editStatus} onChange={e => setEditStatus(e.target.value)}
                             className="w-full border border-input rounded px-2 py-1 text-xs bg-background">
                             {["requested", "reviewing", "approved", "rejected"].map(s => <option key={s} value={s}>{formatStatus(s)}</option>)}
                           </select>
-                          <input type="number" placeholder="Cost ($)" value={editCost} onChange={e => setEditCost(e.target.value)}
+                          <label htmlFor={`quote-cost-${q.id}`} className="sr-only">Estimated Cost</label>
+                          <input id={`quote-cost-${q.id}`} name="estimatedCost" type="number" placeholder="Cost ($)" value={editCost} onChange={e => setEditCost(e.target.value)}
                             className="w-full border border-input rounded px-2 py-1 text-xs bg-background" />
                           <div className="flex gap-1">
                             <button onClick={() => handleUpdate(q.id)} disabled={updating}

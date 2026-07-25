@@ -58,6 +58,7 @@ export default function Track() {
 
           <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto flex gap-2">
             <div className="relative flex-1">
+              <label htmlFor="trackingNumber" className="sr-only">Tracking Number</label>
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
