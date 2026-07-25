@@ -372,16 +372,16 @@ export default function NewShipment() {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium mb-1">Name / Company</label>
-                <input required name="senderName" value={formData.senderName} onChange={handleChange}
+                <label htmlFor="senderName" className="block text-sm font-medium mb-1">Name / Company</label>
+                <input id="senderName" required name="senderName" value={formData.senderName} onChange={handleChange}
                   className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                   placeholder="e.g. Acme Corp" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+                <label htmlFor="senderAddress" className="block text-sm font-medium mb-1 flex items-center gap-1">
                   <MapPin className="h-3 w-3 text-muted-foreground" /> Origin Address
                 </label>
-                <textarea required name="senderAddress" value={formData.senderAddress} onChange={handleChange} rows={3}
+                <textarea id="senderAddress" required name="senderAddress" value={formData.senderAddress} onChange={handleChange} rows={3}
                   className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
                   placeholder="Full street address..." />
               </div>
@@ -395,16 +395,16 @@ export default function NewShipment() {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium mb-1">Recipient Name</label>
-                <input required name="recipientName" value={formData.recipientName} onChange={handleChange}
+                <label htmlFor="recipientName" className="block text-sm font-medium mb-1">Recipient Name</label>
+                <input id="recipientName" required name="recipientName" value={formData.recipientName} onChange={handleChange}
                   className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                   placeholder="e.g. Jane Doe" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+                <label htmlFor="recipientAddress" className="block text-sm font-medium mb-1 flex items-center gap-1">
                   <MapPin className="h-3 w-3 text-muted-foreground" /> Delivery Address
                 </label>
-                <textarea required name="recipientAddress" value={formData.recipientAddress} onChange={handleChange} rows={3}
+                <textarea id="recipientAddress" required name="recipientAddress" value={formData.recipientAddress} onChange={handleChange} rows={3}
                   className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
                   placeholder="Full street address..." />
               </div>
@@ -418,23 +418,23 @@ export default function NewShipment() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+              <label htmlFor="weight" className="block text-sm font-medium mb-1 flex items-center gap-1">
                 <Scale className="h-3 w-3 text-muted-foreground" /> Weight (kg)
               </label>
-              <input type="number" step="0.01" name="weight" value={formData.weight} onChange={handleChange}
+              <input id="weight" type="number" step="0.01" name="weight" value={formData.weight} onChange={handleChange}
                 className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                 placeholder="0.00" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+              <label htmlFor="estimatedDelivery" className="block text-sm font-medium mb-1 flex items-center gap-1">
                 <Calendar className="h-3 w-3 text-muted-foreground" /> Est. Delivery Date
               </label>
-              <input type="date" name="estimatedDelivery" value={formData.estimatedDelivery} onChange={handleChange}
+              <input id="estimatedDelivery" type="date" name="estimatedDelivery" value={formData.estimatedDelivery} onChange={handleChange}
                 className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Description / Notes</label>
-              <input name="description" value={formData.description} onChange={handleChange}
+              <label htmlFor="description" className="block text-sm font-medium mb-1">Description / Notes</label>
+              <input id="description" name="description" value={formData.description} onChange={handleChange}
                 className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                 placeholder="e.g. Fragile contents" />
             </div>

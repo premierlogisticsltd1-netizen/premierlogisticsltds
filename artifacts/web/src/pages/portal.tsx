@@ -76,13 +76,16 @@ export default function Portal() {
               { key: "address", label: "Address (optional)", placeholder: "123 Main St, City, Country" },
             ].map(({ key, label, required, placeholder }) => (
               <div key={key}>
-                <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
+                <label htmlFor={`reg-${key}`} className="block text-sm font-medium text-foreground mb-1">{label}</label>
                 <input
-                  type={key === "email" ? "email" : "text"}
+                  id={`reg-${key}`}
+                  name={key}
+                  type={key === "email" ? "email" : key === "phone" ? "tel" : "text"}
                   required={required}
                   placeholder={placeholder}
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                  autoComplete={key === "email" ? "email" : key === "name" ? "name" : key === "address" ? "street-address" : key === "phone" ? "tel" : "organization"}
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>

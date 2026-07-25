@@ -383,9 +383,11 @@ export default function Home() {
                         { field: "origin", label: "Pickup Location", placeholder: "London, UK", required: true },
                         { field: "destination", label: "Delivery Location", placeholder: "New York, US", required: true },
                       ].map(({ field, label, placeholder, type, required }) => (
-                        <label key={field} className="block text-sm font-semibold text-[#1a2744]">
+                        <label key={field} htmlFor={`quote-${field}`} className="block text-sm font-semibold text-[#1a2744]">
                           {label}{required && <span className="text-[#ff6208] ml-0.5">*</span>}
                           <input
+                            id={`quote-${field}`}
+                            name={field}
                             type={type ?? "text"}
                             required={required}
                             value={quoteForm[field as keyof typeof quoteForm]}
@@ -395,9 +397,11 @@ export default function Home() {
                           />
                         </label>
                       ))}
-                      <label className="block text-sm font-semibold text-[#1a2744]">
+                      <label htmlFor="quote-serviceType" className="block text-sm font-semibold text-[#1a2744]">
                         Service Type
                         <select
+                          id="quote-serviceType"
+                          name="serviceType"
                           value={quoteForm.serviceType}
                           onChange={(e) => updateQuoteField("serviceType", e.target.value)}
                           className="mt-1.5 w-full rounded border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#ff6208] focus:ring-2 focus:ring-[#ff6208]/20"
@@ -408,9 +412,11 @@ export default function Home() {
                           <option value="freight">Freight</option>
                         </select>
                       </label>
-                      <label className="block text-sm font-semibold text-[#1a2744]">
+                      <label htmlFor="quote-weight" className="block text-sm font-semibold text-[#1a2744]">
                         Weight (kg)
                         <input
+                          id="quote-weight"
+                          name="weight"
                           type="number"
                           min="0"
                           step="0.1"
@@ -421,9 +427,11 @@ export default function Home() {
                         />
                       </label>
                     </div>
-                    <label className="mt-4 block text-sm font-semibold text-[#1a2744]">
+                    <label htmlFor="quote-notes" className="mt-4 block text-sm font-semibold text-[#1a2744]">
                       Shipment Details
                       <textarea
+                        id="quote-notes"
+                        name="notes"
                         rows={3}
                         value={quoteForm.notes}
                         onChange={(e) => updateQuoteField("notes", e.target.value)}

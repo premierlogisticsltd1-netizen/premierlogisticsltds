@@ -61,9 +61,12 @@ export default function Track() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
+                id="trackingNumber"
+                name="trackingNumber"
                 placeholder="Enter Tracking Number (e.g. TRK-...)"
                 value={trackingNumber}
                 onChange={(e) => setTrackingNumber(e.target.value)}
+                autoComplete="off"
                 className="w-full pl-12 pr-4 py-4 bg-card text-foreground border-2 border-transparent rounded-lg focus:outline-none focus:border-primary font-mono text-lg transition-colors shadow-lg"
               />
             </div>
