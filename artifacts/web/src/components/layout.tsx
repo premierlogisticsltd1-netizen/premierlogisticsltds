@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useClerk } from "@clerk/react";
 import { useGetMe } from "@workspace/api-client-react";
 import {
   Package2, LayoutDashboard, Truck, LogOut, Loader2, Search,
@@ -10,21 +10,24 @@ import { useListNotifications, useMarkNotificationRead } from "@workspace/api-cl
 import { useState as useStateNotif } from "react";
 import { useState } from "react";
 
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 const PHONE = "+1 202 753 0933";
 const PHONE_HREF = "tel:+12027530933";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const { user: clerkUser, isSignedIn, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const { data: me } = useGetMe();
   const [location] = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useStateNotif(false);
   const role = me?.role;
-  const { data: notifications = [] } = useListNotifications({ query: { enabled: !!isAuthenticated, queryKey: ["listNotifications"] } });
+  const { data: notifications = [] } = useListNotifications({ query: { enabled: !!isSignedIn, queryKey: ["listNotifications"] } });
   const markRead = useMarkNotificationRead();
   const unreadCount = notifications.filter((n: { read: boolean }) => !n.read).length;
 
-  if (isLoading) {
+  if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -32,7 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) return <>{children}</>;
+  if (!isSignedIn) return <>{children}</>;
 
   const roleStr = role as string | undefined;
   const isStaff = ["admin", "manager", "operations", "support", "tracking_agent", "staff"].includes(roleStr ?? "");
@@ -197,20 +200,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* User section */}
       <div className="p-4 border-t border-sidebar-border shrink-0">
         <div className="flex items-center gap-3 mb-3 px-2">
-          {user?.profileImageUrl ? (
-            <img src={user.profileImageUrl} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+          {clerkUser?.imageUrl ? (
+            <img src={clerkUser.imageUrl} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center font-bold text-sm text-white">
-              {user?.firstName?.[0] || "U"}
+              {clerkUser?.firstName?.[0] ?? clerkUser?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? "U"}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate text-sidebar-foreground">{user?.firstName} {user?.lastName}</p>
-            <p className="text-xs text-sidebar-foreground/50 truncate">{user?.email}</p>
+            <p className="text-sm font-semibold truncate text-sidebar-foreground">
+              {clerkUser?.firstName} {clerkUser?.lastName}
+            </p>
+            <p className="text-xs text-sidebar-foreground/50 truncate">
+              {clerkUser?.primaryEmailAddress?.emailAddress}
+            </p>
           </div>
         </div>
         <button
-          onClick={() => logout()}
+          onClick={() => signOut({ redirectUrl: basePath || "/" })}
           className="w-full flex items-center gap-3 px-3 py-2 text-sm text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground rounded-md transition-colors"
         >
           <LogOut className="h-4 w-4" />

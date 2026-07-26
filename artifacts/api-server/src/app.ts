@@ -1,12 +1,17 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { clerkMiddleware } from "@clerk/express";
+import { publishableKeyFromHost } from "@clerk/shared/keys";
+import {
+  CLERK_PROXY_PATH,
+  clerkProxyMiddleware,
+  getClerkProxyHost,
+} from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
 import { logger } from "./lib/logger";
-import { authMiddleware } from "./middlewares/authMiddleware";
 
 const app: Express = express();
 
@@ -48,16 +53,28 @@ app.use(
   }),
 );
 
-// CORS: In production, lock down to the known domain; in dev allow the Replit preview origin
+// Clerk proxy must be mounted BEFORE body parsers (it streams raw bytes)
+app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
+
+// CORS: In production, lock down to the known domain; in dev allow all origins
 const allowedOrigin = process.env["NODE_ENV"] === "production"
   ? ["https://premierlogisticsltds.com", "https://www.premierlogisticsltds.com"]
   : true;
 app.use(cors({ credentials: true, origin: allowedOrigin }));
 
-app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(authMiddleware);
+
+// Clerk auth middleware — resolves publishable key from request host so the
+// same binary works across custom domains, dev, and prod.
+app.use(
+  clerkMiddleware((req) => ({
+    publishableKey: publishableKeyFromHost(
+      getClerkProxyHost(req) ?? "",
+      process.env.CLERK_PUBLISHABLE_KEY,
+    ),
+  })),
+);
 
 app.use("/api", router);
 

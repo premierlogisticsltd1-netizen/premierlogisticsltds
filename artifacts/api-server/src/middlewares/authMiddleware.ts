@@ -1,112 +1,97 @@
-import type { AuthUser } from '@workspace/api-zod';
+import { getAuth } from '@clerk/express';
 import { type NextFunction, type Request, type Response } from 'express';
-import * as oidc from 'openid-client';
-
-import {
-  clearSession,
-  getOidcConfig,
-  getSession,
-  getSessionId,
-  updateSession,
-  type SessionData,
-} from '../lib/auth';
 import { db, usersTable } from '@workspace/db';
 import { eq } from 'drizzle-orm';
 
+type LocalUser = {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl: string | null;
+  role: string;
+};
+
 declare global {
   namespace Express {
-    interface User extends AuthUser {}
-
     interface Request {
       isAuthenticated(): this is AuthedRequest;
-
-      user?: User | undefined;
+      user?: LocalUser;
     }
-
-    export interface AuthedRequest {
-      user: User;
+    export interface AuthedRequest extends Request {
+      user: LocalUser;
     }
   }
 }
 
-async function refreshIfExpired(
-  sid: string,
-  session: SessionData,
-): Promise<SessionData | null> {
-  const now = Math.floor(Date.now() / 1000);
-  if (!session.expires_at || now <= session.expires_at) return session;
+/**
+ * JIT-provision the local user row when a Clerk userId is first seen.
+ * On conflict (user already exists) just returns the existing row.
+ */
+async function getOrProvisionUser(userId: string): Promise<LocalUser> {
+  // Try to find existing user first
+  const [existing] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+  if (existing) return existing as LocalUser;
 
-  if (!session.refresh_token) return null;
+  // First sign-in — create a placeholder row. Role defaults to 'customer'.
+  const [created] = await db
+    .insert(usersTable)
+    .values({
+      id: userId,
+      email: null,
+      firstName: null,
+      lastName: null,
+      profileImageUrl: null,
+    })
+    .onConflictDoNothing()
+    .returning();
 
-  try {
-    const config = await getOidcConfig();
-    const tokens = await oidc.refreshTokenGrant(config, session.refresh_token);
-    session.access_token = tokens.access_token;
-    session.refresh_token = tokens.refresh_token ?? session.refresh_token;
-    session.expires_at = tokens.expiresIn()
-      ? now + tokens.expiresIn()!
-      : session.expires_at;
-    await updateSession(sid, session);
-    return session;
-  } catch {
-    return null;
-  }
+  return (created as LocalUser) ?? {
+    id: userId,
+    email: null,
+    firstName: null,
+    lastName: null,
+    profileImageUrl: null,
+    role: 'customer',
+  };
 }
 
-export async function authMiddleware(
+/**
+ * Require a signed-in Clerk session. Sets req.user from the DB (JIT provisioning).
+ */
+export async function requireAuth(
   req: Request,
   res: Response,
   next: NextFunction,
-) {
-  req.isAuthenticated = function (this: Request) {
-    return this.user != null;
-  } as Request['isAuthenticated'];
-
-  const sid = getSessionId(req);
-  if (!sid) {
-    next();
-    return;
-  }
-
-  const session = await getSession(sid);
-  if (!session?.user?.id) {
-    await clearSession(res, sid);
-    next();
-    return;
-  }
-
-  const refreshed = await refreshIfExpired(sid, session);
-  if (!refreshed) {
-    await clearSession(res, sid);
-    next();
-    return;
-  }
-
-  req.user = refreshed.user;
-  next();
-}
-
-export function requireAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  if (!req.isAuthenticated()) {
+): Promise<void> {
+  const { userId } = getAuth(req);
+  if (!userId) {
     res.status(401).json({ error: 'Authentication required' });
     return;
   }
-
+  const user = await getOrProvisionUser(userId);
+  req.user = user;
+  req.isAuthenticated = function(this: Request) { return true; } as Request['isAuthenticated'];
   next();
 }
 
+/**
+ * Require a signed-in user whose DB role is one of the given roles.
+ */
 export function requireRole(...roles: string[]) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.isAuthenticated()) {
+    const { userId } = getAuth(req);
+    if (!userId) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
-    const [user] = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, req.user.id));
-    if (!user || !roles.includes(user.role)) {
+    const user = await getOrProvisionUser(userId);
+    req.user = user;
+    req.isAuthenticated = function(this: Request) { return true; } as Request['isAuthenticated'];
+    if (!roles.includes(user.role ?? '')) {
       res.status(403).json({ error: 'Insufficient permissions' });
       return;
     }
